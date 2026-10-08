@@ -86,10 +86,10 @@ summary{color:var(--mute);cursor:pointer;font-size:14px;padding:4px 0}
 </div>
 
 <h1>Tarjuman Free</h1>
-<p class="sub">Record, upload audio, read a photo or a YouTube link into text, then translate.</p>
+<p class="sub">Free. Speak or type, read a photo, upload a recording, then translate. Tip: on a phone, tap the <b>keyboard's own mic</b> in the Text box to dictate in any language.</p>
 <div class="banner" id="banner" hidden></div>
 
-<details class="keycard" id="keybox" open>
+<details class="keycard" id="keybox" hidden>
   <summary id="keysum">Add your free Google key (accurate Urdu, photos, YouTube)</summary>
   <p class="note" style="margin-top:0">Without a key the app still works in a basic way. With a free Google key, speech, photos and YouTube become much more accurate.</p>
   <ol class="steps">
@@ -129,7 +129,7 @@ summary{color:var(--mute);cursor:pointer;font-size:14px;padding:4px 0}
 <section class="panel" id="p-audio" hidden>
   <label for="afile">Recording or video file</label>
   <input type="file" id="afile" accept="audio/*,video/*">
-  <div id="aq"><label for="amodel">Quality (only when no Google key)</label>
+  <div id="aq"><label for="amodel">Quality (bigger = more accurate, slower)</label>
     <select id="amodel">
       <option value="Xenova/whisper-tiny">Fast (small download, lower accuracy)</option>
       <option value="Xenova/whisper-base" selected>Balanced (about 80 MB download)</option>
@@ -145,7 +145,7 @@ summary{color:var(--mute);cursor:pointer;font-size:14px;padding:4px 0}
   <input type="file" id="pfile" accept="image/*" multiple>
   <div class="thumbs" id="thumbs"></div>
   <button class="go" id="pread" type="button">Read the text in the photos</button>
-  <p class="note">Hold the phone straight, in good light, with the page filling the photo. With a Google key, Urdu, Arabic and Hindi are read far better than without.</p>
+  <p class="note">Hold the phone straight, in good light, with the page filling the photo. Printed text reads well; handwriting and Urdu are weak in free mode.</p>
 </section>
 
 <section class="panel" id="p-yt" hidden>
@@ -156,9 +156,9 @@ summary{color:var(--mute);cursor:pointer;font-size:14px;padding:4px 0}
     <div><label for="yend">To minute (optional)</label><input type="number" id="yend" inputmode="decimal" min="0" placeholder="end"></div>
   </div>
   <button class="go" id="ygo" type="button">Get what is spoken as text</button>
-  <p class="note">Needs your free Google key. The video must be public (not private or unlisted). For a long video, take it in parts using From and To.</p>
-  <details>
-    <summary>No key? Use YouTube's own transcript</summary>
+  <p class="note"><b>Pasting a link alone cannot be read free from a web page.</b> Use YouTube's own transcript (steps below). It is the spoken text in the video's own language.</p>
+  <details id="ytsteps" open>
+    <summary>Get the full transcript (free)</summary>
     <ol class="steps">
       <li>Open the video in YouTube, tap the description (…more).</li>
       <li>Tap <b>Show transcript</b>, select all and copy.</li>
@@ -204,7 +204,7 @@ summary{color:var(--mute);cursor:pointer;font-size:14px;padding:4px 0}
 
 <details>
   <summary>Settings and limits</summary>
-  <p class="note">Without a Google key, translation uses the free MyMemory service, which has a small daily limit. Adding your email raises it.</p>
+  <p class="note">Translation uses the free MyMemory service, which has a small daily limit. Adding your email raises it.</p>
   <label for="email" style="margin-top:10px">Your email (optional)</label>
   <input id="email" type="email" autocomplete="email" placeholder="you@example.com">
   <div class="btns"><button class="s" id="signout" type="button">Remove saved access code from this device</button></div>
@@ -309,15 +309,17 @@ $('gretry').onclick=runGate;
 $('signout').onclick=()=>{ls.set('tj_hash','');ls.set('tj_ok','0');runGate();};
 
 /* ================= Google Gemini client (your own free key) ================= */
-const MODELS=['gemini-3.8-flash','gemini-3.7-flash','gemini-flash-latest','gemini-2.5-flash'];
+const MODELS=['gemini-3.8-flash','gemini-3.7-flash','gemini-flash-latest','gemini-2.5-flash','gemini-3.5-flash'];
 const API='https://generativelanguage.googleapis.com/v1beta/';
-const hasKey=()=>!!ls.get('tj_gkey','');
+const hasKey=()=>false; /* no Google key: everything runs free in the browser */
 class GErr extends Error{constructor(m,status,code){super(m);this.status=status;this.code=code;}}
-async function gfetch(path,body,signal){
-  let r;
-  try{r=await fetch(API+path,{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':ls.get('tj_gkey','')},body:JSON.stringify(body),signal});}
-  catch(e){if(e&&e.name==='AbortError')throw e;throw new GErr('network',0,'network');}
-  let d=null;try{d=await r.json();}catch(e){}
+async function gfetch(path,body,signal,timeoutMs){
+  let r,timedOut=false;
+  const ac=new AbortController(),tm=setTimeout(()=>{timedOut=true;ac.abort();},timeoutMs||120000);
+  if(signal){if(signal.aborted)ac.abort();else signal.addEventListener('abort',()=>ac.abort());}
+  try{r=await fetch(API+path,{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':ls.get('tj_gkey','')},body:JSON.stringify(body),signal:ac.signal});}
+  catch(e){clearTimeout(tm);if(timedOut)throw new GErr('timeout',0,'timeout');if(e&&e.name==='AbortError')throw e;throw new GErr('network: '+(e&&e.message||''),0,'network');}
+  let d=null;try{d=await r.json();}catch(e){}clearTimeout(tm);
   if(!r.ok){
     const m=(d&&d.error&&d.error.message)||('HTTP '+r.status),st=(d&&d.error&&d.error.status)||'';
     let code='bad';
@@ -360,6 +362,8 @@ function toLegacy(parts,max){
 function readInteraction(d){
   let t='';
   for(const s of d.steps||[])if(s&&s.type==='model_output')for(const c of s.content||[])if(c&&c.type==='text'&&c.text)t+=c.text;
+  if(!t&&typeof d.output_text==='string')t=d.output_text;
+  if(!t)for(const o of d.outputs||[])if(o&&o.type==='text'&&o.text)t+=o.text;
   return {text:t,truncated:d.status==='incomplete'};
 }
 function readLegacy(d){
@@ -372,7 +376,7 @@ function readLegacy(d){
 const MODEL_PROBLEM=/model|not found|no longer|deprecat|not supported|unsupported/i;
 async function gem(parts,opt){
   opt=opt||{};const max=opt.max||32768;
-  const order=opt.legacyFirst?['legacy','inter']:['inter','legacy'];
+  const order=['legacy','inter'];
   const saved=ls.get('tj_gmodel','');
   const models=saved?[saved].concat(MODELS.filter(m=>m!==saved)):MODELS.slice();
   let last=null;
@@ -381,14 +385,14 @@ async function gem(parts,opt){
     for(const kind of order){
       try{
         let res;
-        if(kind==='inter')res=readInteraction(await gfetch('interactions',Object.assign({model},toInteraction(parts,max)),opt.signal));
-        else res=readLegacy(await gfetch('models/'+model+':generateContent',toLegacy(parts,max),opt.signal));
+        if(kind==='inter')res=readInteraction(await gfetch('interactions',Object.assign({model},toInteraction(parts,max)),opt.signal,opt.timeout));
+        else res=readLegacy(await gfetch('models/'+model+':generateContent',toLegacy(parts,max),opt.signal,opt.timeout));
         if(!res.text.trim())throw new GErr('empty',0,'empty');
         ls.set('tj_gmodel',model);return res;
       }catch(e){
         last=e;
         if(e&&e.name==='AbortError')throw e;
-        if(['key','limit','network','denied','blocked','empty'].includes(e.code))throw e;
+        if(['key','limit','network','denied','blocked','empty','timeout'].includes(e.code))throw e;
         if(e.code==='notfound'||MODEL_PROBLEM.test(e.message||''))modelBad=true;
       }
     }
@@ -400,7 +404,8 @@ function gerrCopy(e,what){
   const c=e&&e.code;
   if(c==='key')return 'Your Google key was not accepted. Open "Free Google key" above and paste it again.';
   if(c==='limit')return 'Google free limit reached for now. Wait a minute, or try again tomorrow.';
-  if(c==='network')return 'Could not reach Google. Check your internet and try again.';
+  if(c==='network')return 'Could not reach Google ('+String(e.message||'').slice(0,80)+'). Check your internet and try again.';
+  if(c==='timeout')return 'Google took too long and was stopped. Try a smaller photo, a shorter recording, or try again.';
   if(c==='denied')return 'Google refused this request. The key may be restricted, or the service is not available in your region.';
   if(c==='blocked')return 'Google would not process this content.';
   if(c==='empty')return 'Nothing came back'+(what?' for '+what:'')+'. Try again, or use a clearer, shorter input.';
@@ -412,7 +417,7 @@ function refreshKeyUI(){
   $('keybox').classList.toggle('ok',k);
   $('kdel').hidden=!k;$('gkey').value='';
   $('gkey').placeholder=k?'Saved. Paste a new key to replace it':'Paste your key here';
-  $('keybox').open=!k;
+  
   $('aq').hidden=k;
   $('pread').textContent=k?'Read the text in the photos':'Read the text (basic, no key)';
 }
@@ -421,7 +426,7 @@ $('ksave').onclick=async()=>{
   if(!v||v.length<20||/\s/.test(v)){status('Paste the whole key, with no spaces.',true);return;}
   const old=ls.get('tj_gkey','');ls.set('tj_gkey',v);
   $('ksave').disabled=true;status('Testing your key…');
-  try{await gem([{text:'Reply with the single word OK.'}],{max:64});refreshKeyUI();status('Key works. It is saved on this device only.');}
+  try{await gem([{text:'Reply with the single word OK.'}],{max:1024,timeout:30000});refreshKeyUI();status('Key works. It is saved on this device only.');}
   catch(e){ls.set('tj_gkey',old);status(gerrCopy(e,'key test'),true);}
   finally{$('ksave').disabled=false;}
 };
@@ -490,7 +495,7 @@ async function transcribeGoogle(x){
     setProg('Reading part '+(i+1)+' of '+ws.length+'…',(i/ws.length)*100);status('Reading part '+(i+1)+' of '+ws.length+'…');
     if(rms(ws[i])<0.002)continue;
     const b64=await blobB64(wav16(ws[i]));
-    const r=await gem([{text:tPrompt()},{audio:{b64,mime:'audio/wav'}}],{signal:newCtl()});
+    const r=await gem([{text:tPrompt()},{audio:{b64,mime:'audio/wav'}}],{signal:newCtl(),timeout:180000});
     const t=r.text.trim();
     if(/\[\[\s*NO SPEECH\s*\]\]/i.test(t)&&t.length<30)continue;
     parts.push(t.replace(/\[\[\s*NO SPEECH\s*\]\]/ig,'').trim());
@@ -663,7 +668,7 @@ $('pread').onclick=async()=>{
         $('orig').value=out.join('\n\n');updCount();
       }
     }else{
-      const s=src();if(!s){status('Pick the language of the text in the photo (not Auto-detect), or add a free Google key.',true);return;}
+      const s=src();if(!s){status('Pick the language of the text in the photo (not Auto-detect).',true);return;}
       setProg('Loading the basic photo reader…',3);await loadTess();
       let code=s[3];if(code!=='eng')code+='+eng';
       for(let i=0;i<fs.length;i++){
@@ -675,7 +680,7 @@ $('pread').onclick=async()=>{
     }
     if(cancel){status('Stopped. Text so far is below.');return;}
     if(!out.length){status('No text found. Try a clearer, closer, well-lit photo.',true);return;}
-    if(!hasKey())status('Done (basic reader). For Urdu, Arabic or Hindi add a free Google key. Check the text, then Translate.');
+    if(!hasKey())status('Done. Check the text carefully (free reader can miss handwriting), then Translate.');
     else if($('autotr').checked){await translateAll(true);}
     else status('Done. Check the text, then tap Translate.');
   }catch(e){handleErr(e,'photo');}
@@ -688,7 +693,7 @@ function mins(v){const n=parseFloat(String(v).replace(',','.'));return isFinite(
 $('ygo').onclick=async()=>{
   const id=ytId($('ylink').value);
   if(!id){status('Paste a full YouTube link first.',true);return;}
-  if(!hasKey()){$('keybox').open=true;status('Add your free Google key first (top of the page). It reads YouTube videos for you.',true);scrollTo({top:0,behavior:'smooth'});return;}
+  {status('Direct link reading needs a paid or keyed service, so it is off. Use the steps below: open the video in YouTube, tap Show transcript, copy it and paste it into the Text box.',true);$('ytsteps').open=true;return;}
   const st=mins($('ystart').value),en=mins($('yend').value);
   if(st!=null&&en!=null&&en<=st){status('"To minute" must be bigger than "From minute".',true);return;}
   if(busy)return;setBusy(true);cancel=false;
@@ -697,7 +702,7 @@ $('ygo').onclick=async()=>{
     const p='Transcribe everything that is SPOKEN in this video exactly as said, word for word, in the language(s) spoken and in each language\'s normal script (Urdu in Urdu script, Arabic in Arabic script, and so on). Do NOT translate, summarize or describe the pictures. Do not add timestamps. Add paragraph breaks. If a word is unclear write [unclear].'+(s?' The main language is '+s[0]+'.':'')+(hint?' Names and terms that may appear: '+hint+'.':'')+' Reply with only the transcript.';
     setProg('Google is watching the video. This can take a minute or two…',20);status('Reading the video…');
     const yt={url:'https://www.youtube.com/watch?v='+id};if(st!=null)yt.start=st;if(en!=null)yt.end=en;
-    const r=await gem([{text:p},{youtube:yt}],{signal:newCtl(),legacyFirst:st!=null||en!=null,max:65536});
+    const r=await gem([{text:p},{youtube:yt}],{signal:newCtl(),max:65536,timeout:600000});
     $('orig').value=r.text.trim();updCount();setProg('Done.',100);
     if(r.truncated)status('The transcript was cut at its length limit. Run again with "From minute" set to where it stopped.',true);
     else if($('autotr').checked){await translateAll(true);}
@@ -779,14 +784,14 @@ async function translateAll(fromAuto){
   }catch(e){
     if(done.length)$('trans').textContent=done.join('\n').trim();
     if(e&&e.name==='AbortError')status('Stopped. What was translated so far is shown.');
-    else if(e&&e.code==='mmlimit')status('Free daily translation limit reached'+(done.length?' (translated up to here)':'')+'. Add your email in Settings, or add a free Google key.',true);
+    else if(e&&e.code==='mmlimit')status('Free daily translation limit reached'+(done.length?' (translated up to here)':'')+'. Try again tomorrow.',true);
     else if(e&&e.message==='Failed to fetch')status('No internet connection.',true);
     else handleErr(e,'translation');
   }finally{if(!wasBusy)setBusy(false);endProg();}
 }
 $('go').onclick=()=>translateAll(false);
 $('chk').onclick=async()=>{
-  if(!hasKey()){status('Meaning check needs your free Google key.',true);$('keybox').open=true;return;}
+  if(!hasKey()){status('Meaning check is not available in free mode.',true);return;}
   const o=cleanTranscript($('orig').value),t=$('trans').textContent.trim();
   if(!o||!t){status('Translate something first.',true);return;}
   if(busy)return;setBusy(true);status('Checking the meaning…');
