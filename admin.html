@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Tarjuman Control Panel</title>
+<style>
+:root{--bg:#0f1720;--card:#17222e;--line:#263545;--fg:#eaf1f7;--mute:#8fa3b5;--acc:#2fd3a5;--acc2:#0f3d33;--warn:#f2b84b;--bad:#ff6b6b;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 30px);max-width:680px;margin:0 auto}
+h1{margin:0 0 2px;font-size:24px}
+h2{margin:0 0 10px;font-size:17px}
+.sub{color:var(--mute);font-size:14px;margin:0 0 14px}
+label{display:block;font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+input[type=text],input[type=url],input[type=date],textarea,select{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+textarea{min-height:200px;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.row{display:grid;gap:10px;margin-bottom:10px}
+.two{grid-template-columns:1fr 1fr}
+.sw{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sw input{width:22px;height:22px}
+.btn{font:inherit;font-weight:700;color:#04251d;background:var(--acc);border:0;border-radius:12px;padding:12px 16px;cursor:pointer}
+button.s{font:inherit;font-size:14px;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer}
+button.s.bad{color:var(--bad);border-color:#5a2a2e}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.person{border-top:1px solid var(--line);padding:10px 0}
+.person:first-child{border-top:0}
+.person b{font-size:16px}
+.code{font:600 18px ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:var(--acc)}
+.note{font-size:13px;color:var(--mute);margin:6px 0 0}
+.ok{color:var(--acc);font-size:14px;min-height:20px}
+ol{padding-left:20px;margin:6px 0;font-size:14px}
+</style>
+</head>
+<body>
+<h1>Tarjuman Control Panel</h1>
+<p class="sub">Keep this page to yourself. Your list is saved only in this browser.</p>
+
+<section class="card">
+  <h2>1. Your app link</h2>
+  <label for="site">Link of your Tarjuman page</label>
+  <input type="url" id="site" placeholder="https://yourname.github.io/tarjuman/">
+</section>
+
+<section class="card">
+  <h2>2. Switches</h2>
+  <div class="sw"><input type="checkbox" id="enabled" checked><label for="enabled" style="margin:0;text-transform:none;font-size:15px;color:var(--fg)">App is ON (untick to close it for everyone)</label></div>
+  <div class="sw"><input type="checkbox" id="require"><label for="require" style="margin:0;text-transform:none;font-size:15px;color:var(--fg)">Ask for an access code</label></div>
+  <div class="row">
+    <div><label for="msg">Message shown to everyone (optional)</label><input type="text" id="msg" placeholder="e.g. New version coming Friday"></div>
+    <div><label for="closed">Message when the app is closed</label><input type="text" id="closed" value="This app is closed for now."></div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>3. People with access</h2>
+  <div class="row two">
+    <div><label for="pname">Name</label><input type="text" id="pname" placeholder="e.g. Ahmed" autocomplete="off"></div>
+    <div><label for="pexp">Valid until (optional)</label><input type="date" id="pexp"></div>
+  </div>
+  <button class="btn" id="add" type="button">Create code</button>
+  <div class="ok" id="addok"></div>
+  <div id="list"></div>
+  <p class="note" id="empty">No one yet. Create a code for yourself first.</p>
+</section>
+
+<section class="card">
+  <h2>4. Publish your settings</h2>
+  <p class="note">This is your <b>config.json</b>. Copy it and replace the file in your GitHub repository. Changes reach everyone within a few minutes.</p>
+  <textarea id="out" readonly aria-label="config.json"></textarea>
+  <div class="btns" style="margin-top:10px">
+    <button class="btn" id="copy" type="button">Copy config.json</button>
+    <button class="s" id="save" type="button">Download file</button>
+  </div>
+  <div class="ok" id="outok"></div>
+  <ol>
+    <li>Open your repository on github.com.</li>
+    <li>Tap <b>config.json</b>, then the pencil icon (Edit).</li>
+    <li>Select all, paste what you copied, tap <b>Commit changes</b>.</li>
+  </ol>
+  <p class="note">To remove one person: tap Remove next to their name, copy config.json again and commit it. To close everything: untick "App is ON", copy and commit.</p>
+</section>
+
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const KEY='tj_admin_v1';
+let S={salt:'',site:'',enabled:true,require:false,msg:'',closed:'This app is closed for now.',people:[]};
+try{Object.assign(S,JSON.parse(localStorage.getItem(KEY)||'{}'));}catch(e){}
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
+const hex=u=>[...u].map(b=>b.toString(16).padStart(2,'0')).join('');
+if(!S.salt){S.salt=hex(crypto.getRandomValues(new Uint8Array(16)));persist();}
+/* must match the gate in index.html */
+async function derive(code,salt){
+  const enc=new TextEncoder();
+  const k=await crypto.subtle.importKey('raw',enc.encode(code),'PBKDF2',false,['deriveBits']);
+  const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:enc.encode(salt),iterations:100000,hash:'SHA-256'},k,256);
+  return hex(new Uint8Array(bits));
+}
+const AL='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function newCode(){
+  const r=crypto.getRandomValues(new Uint8Array(10));let s='';
+  for(const b of r)s+=AL[b%AL.length];
+  return s.slice(0,5)+'-'+s.slice(5);
+}
+function config(){
+  return JSON.stringify({
+    enabled:S.enabled,requireCode:S.require,message:S.msg,closedMessage:S.closed,salt:S.salt,
+    codes:S.people.map(p=>{const c={name:p.name,hash:p.hash};if(p.expires)c.expires=p.expires;return c;})
+  },null,2);
+}
+function render(){
+  $('site').value=S.site;$('enabled').checked=S.enabled;$('require').checked=S.require;$('msg').value=S.msg;$('closed').value=S.closed;
+  const box=$('list');box.innerHTML='';$('empty').hidden=S.people.length>0;
+  S.people.forEach((p,i)=>{
+    const d=document.createElement('div');d.className='person';
+    const n=document.createElement('b');n.textContent=p.name+(p.expires?'  ·  until '+p.expires:'  ·  no end date');
+    const c=document.createElement('div');c.className='code';c.textContent=p.code;
+    const b=document.createElement('div');b.className='btns';b.style.marginTop='6px';
+    const m=document.createElement('button');m.className='s';m.type='button';m.textContent='Copy message to send';
+    m.onclick=()=>copy(`Open this link: ${S.site||'(your link)'}\nAccess code: ${p.code}`,m);
+    const r=document.createElement('button');r.className='s bad';r.type='button';r.textContent='Remove';
+    r.onclick=()=>{S.people.splice(i,1);persist();render();};
+    b.append(m,r);d.append(n,c,b);box.appendChild(d);
+  });
+  $('out').value=config();
+}
+async function copy(t,btn){
+  try{await navigator.clipboard.writeText(t);if(btn){const o=btn.textContent;btn.textContent='Copied';setTimeout(()=>btn.textContent=o,1200);}return true;}
+  catch(e){$('outok').textContent='Copy not allowed here. Select the text and copy it by hand.';return false;}
+}
+$('add').onclick=async()=>{
+  const name=$('pname').value.trim();if(!name){$('addok').textContent='Type a name first.';return;}
+  $('add').disabled=true;
+  try{
+    const code=newCode(),hash=await derive(code.replace('-',''),S.salt);
+    S.people.push({name,code,hash,expires:$('pexp').value||''});persist();
+    $('pname').value='';$('pexp').value='';$('addok').textContent='Created for '+name+'. Now copy config.json below and commit it.';render();
+  }finally{$('add').disabled=false;}
+};
+$('site').onchange=()=>{S.site=$('site').value.trim();persist();render();};
+$('enabled').onchange=()=>{S.enabled=$('enabled').checked;persist();render();};
+$('require').onchange=()=>{S.require=$('require').checked;persist();render();};
+$('msg').onchange=()=>{S.msg=$('msg').value.trim();persist();render();};
+$('closed').onchange=()=>{S.closed=$('closed').value.trim()||'This app is closed for now.';persist();render();};
+$('copy').onclick=async()=>{if(await copy($('out').value))$('outok').textContent='Copied. Paste it into config.json on GitHub.';};
+$('save').onclick=()=>{
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('out').value],{type:'application/json'}));a.download='config.json';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+};
+render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "requireCode": false,
+  "message": "",
+  "closedMessage": "This app is closed for now.",
+  "salt": "",
+  "codes": []
+}

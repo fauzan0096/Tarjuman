@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f1720">
+<title>Tarjuman Free</title>
+<style>
+:root{--bg:#0f1720;--card:#17222e;--line:#263545;--fg:#eaf1f7;--mute:#8fa3b5;--acc:#2fd3a5;--acc2:#0f3d33;--warn:#f2b84b;--bad:#ff6b6b;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 30px);max-width:680px;margin:0 auto}
+h1{margin:0 0 2px;font-size:24px}
+.sub{color:var(--mute);font-size:14px;margin:0 0 14px}
+label{display:block;font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+select,input[type=text],input[type=email],input[type=url],textarea{width:100%;font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+select:focus,input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+textarea{resize:vertical;min-height:150px;font-size:18px;line-height:1.6}
+.langs{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;margin-bottom:12px}
+.swap{font:inherit;font-size:20px;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.tab{font:inherit;font-size:14px;font-weight:600;color:var(--mute);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 4px;cursor:pointer}
+.tab[aria-selected=true]{color:#04251d;background:var(--acc);border-color:var(--acc)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.panel[hidden]{display:none}
+.panel .row{display:grid;gap:10px;margin-bottom:10px}
+.mic-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+#mic{width:104px;height:104px;border-radius:50%;border:0;background:var(--acc);color:#04251d;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 0 0 8px var(--acc2)}
+#mic.rec{background:var(--bad);color:#2b0505;box-shadow:0 0 0 8px #4a1f22;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 18px rgba(255,107,107,.12)}}
+@media (prefers-reduced-motion:reduce){#mic.rec{animation:none}}
+input[type=file]{width:100%;font:inherit;color:var(--mute)}
+input[type=file]::file-selector-button{font:inherit;font-weight:600;color:#04251d;background:var(--acc);border:0;border-radius:10px;padding:10px 14px;margin-right:10px;cursor:pointer}
+.go{width:100%;font:inherit;font-weight:700;font-size:17px;color:#04251d;background:var(--acc);border:0;border-radius:12px;padding:13px;cursor:pointer}
+.go:disabled{opacity:.5}
+#status{color:var(--mute);min-height:24px;text-align:center;font-size:15px;margin:2px 0 10px}
+#status.err{color:var(--bad)}
+#prog{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin:6px 0 4px}
+#prog i{display:block;height:100%;width:0;background:var(--acc);transition:width .3s}
+#progtxt{font-size:13px;color:var(--mute);min-height:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:12px 0}
+.card[hidden],#progbox[hidden]{display:none}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.top label{margin:0}
+.chip{background:var(--acc2);color:var(--acc);border-radius:99px;padding:3px 12px;font-size:13px;font-weight:600}
+.out{font-size:19px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;min-height:30px}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button.s{font:inherit;font-size:14px;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:10px;padding:8px 14px;cursor:pointer}
+button.s:active{background:var(--line)}
+.note{font-size:13px;color:var(--mute);margin:8px 0 0}
+ol.steps{margin:8px 0;padding-left:20px;font-size:14px;color:var(--fg)}
+ol.steps li{margin-bottom:4px}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--mute)}
+#pic{max-width:100%;max-height:180px;border-radius:10px;display:none;margin-top:4px}
+a.link{color:var(--acc)}
+.gate{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
+.gate[hidden]{display:none}
+.gbox{max-width:360px;width:100%;text-align:center;display:grid;gap:12px}
+.gbox h2{margin:0;font-size:22px}
+.gbox [hidden]{display:none}
+.banner{background:var(--acc2);color:var(--acc);border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:14px}
+.banner[hidden]{display:none}
+details{margin-top:6px}
+summary{color:var(--mute);cursor:pointer;font-size:14px;padding:4px 0}
+</style>
+</head>
+<body>
+<div class="gate" id="gate">
+  <div class="gbox">
+    <h2 id="gtitle">Checking access…</h2>
+    <p class="note" id="gmsg"></p>
+    <input type="text" id="gcode" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Access code" hidden>
+    <button class="go" id="gok" type="button" hidden>Open</button>
+    <button class="s" id="gretry" type="button" hidden>Try again</button>
+  </div>
+</div>
+<h1>Tarjuman Free</h1>
+<div class="banner" id="banner" hidden></div>
+<p class="sub">Speech, recordings, photos and YouTube text to text, then translate. Free, no account.</p>
+
+<div class="langs">
+  <div><label for="from">Language of the speech / text</label><select id="from"></select></div>
+  <button class="swap" id="swap" type="button" aria-label="Swap languages">⇄</button>
+  <div><label for="to">Translate into</label><select id="to"></select></div>
+</div>
+
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" aria-selected="true" data-t="speak" type="button">Speak</button>
+  <button class="tab" role="tab" aria-selected="false" data-t="audio" type="button">Recording</button>
+  <button class="tab" role="tab" aria-selected="false" data-t="photo" type="button">Photo</button>
+  <button class="tab" role="tab" aria-selected="false" data-t="yt" type="button">YouTube</button>
+</div>
+
+<section class="panel" id="p-speak">
+  <div class="mic-wrap">
+    <button id="mic" type="button">TAP TO<br>SPEAK</button>
+    <div class="note" style="text-align:center">Pick the language you will speak above, then tap. Needs internet.</div>
+  </div>
+</section>
+
+<section class="panel" id="p-audio" hidden>
+  <div class="row">
+    <div><label for="afile">Recording or video file</label><input type="file" id="afile" accept="audio/*,video/*"></div>
+    <div><label for="amodel">Quality</label>
+      <select id="amodel">
+        <option value="Xenova/whisper-tiny">Fast (small download, lower accuracy)</option>
+        <option value="Xenova/whisper-base" selected>Balanced (about 80 MB download)</option>
+        <option value="Xenova/whisper-small">Best (big download, slow on phones)</option>
+      </select></div>
+  </div>
+  <button class="go" id="atrans" type="button">Transcribe the recording</button>
+  <div class="btns"><button class="s" id="acancel" type="button" hidden>Stop</button></div>
+  <p class="note">The speech model runs on your own device and downloads once, then stays saved. Keep the screen on. Short clips (under 10 minutes) are best on a phone. Choose the language above, or "Auto-detect".</p>
+</section>
+
+<section class="panel" id="p-photo" hidden>
+  <div class="row">
+    <div><label for="pfile">Photo of text (page, book, board, screenshot)</label><input type="file" id="pfile" accept="image/*"></div>
+    <label class="chk"><input type="checkbox" id="alsoEng" checked> Also read English words</label>
+  </div>
+  <img id="pic" alt="Selected photo preview">
+  <button class="go" id="pread" type="button">Read the text in the photo</button>
+  <div class="btns"><button class="s" id="pclaude" type="button">Better reading with Claude</button></div>
+  <p class="note" id="pnote">Pick the language of the text above (not Auto-detect). Works best with clear, printed text. Handwriting and fancy Urdu or Arabic calligraphy are weak here, so use "Better reading with Claude" for those.</p>
+</section>
+
+<section class="panel" id="p-yt" hidden>
+  <div class="row">
+    <div><label for="ylink">YouTube link</label><input type="url" id="ylink" placeholder="https://youtu.be/…" autocomplete="off"></div>
+  </div>
+  <div class="btns" style="margin-top:0">
+    <a class="s link" id="yopen" href="#" target="_blank" rel="noopener" style="display:none;text-decoration:none;border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:14px">Open this video on YouTube</a>
+    <button class="s" id="ypaste" type="button">Paste copied transcript</button>
+  </div>
+  <p class="note">A web page cannot download YouTube audio, so use YouTube's own transcript, which is free:</p>
+  <ol class="steps">
+    <li>Open the video in the YouTube app or site.</li>
+    <li>Tap the description (the "…more" part).</li>
+    <li>Scroll down and tap <b>Show transcript</b>.</li>
+    <li>Tap the ⋮ menu and turn <b>timestamps off</b> if you see it. Select all the text and copy it.</li>
+    <li>Come back here and tap <b>Paste copied transcript</b> (or paste into the box below).</li>
+  </ol>
+  <p class="note">This works when the video has captions, including auto-generated ones. If "Show transcript" is missing, the video has none. Then download the audio yourself with the owner's permission and use the Recording tab.</p>
+</section>
+
+<div id="status" role="status" aria-live="polite">Pick a language, then choose how to give the audio or photo.</div>
+<div id="progbox" hidden><div id="prog"><i id="bar"></i></div><div id="progtxt"></div></div>
+
+<section class="card" id="c1">
+  <div class="top"><label for="orig">Text (same language)</label><span class="chip" id="fromChip">…</span></div>
+  <textarea id="orig" dir="auto" placeholder="Your words, recording text, photo text or transcript appear here. You can also type, paste or fix them."></textarea>
+  <div class="note" id="count"></div>
+  <div class="btns">
+    <button class="s" id="retr" type="button">Translate</button>
+    <button class="s" id="copyO" type="button">Copy</button>
+    <button class="s" id="dlO" type="button">Save as file</button>
+    <button class="s" id="clear" type="button">Clear</button>
+  </div>
+</section>
+
+<section class="card" id="c2" hidden>
+  <div class="top"><label>Translation</label><span class="chip" id="toChip">…</span></div>
+  <div class="out" id="trans" dir="auto"></div>
+  <div class="btns">
+    <button class="s" id="speak" type="button">Play voice</button>
+    <button class="s" id="copyT" type="button">Copy</button>
+    <button class="s" id="dlT" type="button">Save as file</button>
+    <button class="s" id="claude" type="button">Better translation with Claude</button>
+  </div>
+  <p class="note" id="claudeNote"></p>
+</section>
+
+<details>
+  <summary>Settings and limits</summary>
+  <p class="note">Translation uses the free MyMemory service. Anonymous use allows only a few thousand characters per day, so long transcripts may stop part way. Adding your email raises the limit a lot. For long texts, use "Better translation with Claude": it copies a ready prompt that you paste into the Claude app.</p>
+  <label for="email" style="margin-top:10px">Your email (optional)</label>
+  <input id="email" type="email" autocomplete="email" placeholder="you@example.com">
+  <div class="btns"><button class="s" id="signout" type="button">Remove saved access code from this device</button></div>
+</details>
+
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+/* name, speech code, MyMemory code, Tesseract code, Whisper name */
+const L=[['Urdu','ur-PK','ur','urd','urdu'],['Hindi','hi-IN','hi','hin','hindi'],['English','en-US','en','eng','english'],['Arabic','ar-SA','ar','ara','arabic'],['Marathi','mr-IN','mr','mar','marathi'],['Bengali','bn-BD','bn','ben','bengali'],['Tamil','ta-IN','ta','tam','tamil'],['Telugu','te-IN','te','tel','telugu'],['Gujarati','gu-IN','gu','guj','gujarati'],['Punjabi','pa-IN','pa','pan','punjabi'],['Malayalam','ml-IN','ml','mal','malayalam'],['Kannada','kn-IN','kn','kan','kannada'],['Persian','fa-IR','fa','fas','persian'],['Turkish','tr-TR','tr','tur','turkish'],['Indonesian','id-ID','id','ind','indonesian'],['Malay','ms-MY','ms','msa','malay'],['French','fr-FR','fr','fra','french'],['Spanish','es-ES','es','spa','spanish'],['German','de-DE','de','deu','german'],['Portuguese','pt-BR','pt','por','portuguese'],['Russian','ru-RU','ru','rus','russian'],['Chinese','zh-CN','zh-CN','chi_sim','chinese'],['Japanese','ja-JP','ja','jpn','japanese'],['Korean','ko-KR','ko','kor','korean'],['Italian','it-IT','it','ita','italian'],['Dutch','nl-NL','nl','nld','dutch'],['Swahili','sw-KE','sw','swa','swahili'],['Somali','so-SO','so','som','somali']];
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+const from=$('from'),to=$('to');
+{const o=document.createElement('option');o.value='';o.textContent='Auto-detect (recordings only)';from.appendChild(o);}
+L.forEach((l,i)=>{for(const s of[from,to]){const o=document.createElement('option');o.value=String(i);o.textContent=l[0];s.appendChild(o);}});
+{ // target has no auto
+  const first=to.options[0]; if(first&&first.value==='')first.remove();
+}
+from.value=ls.get('tf2_from','0');to.value=ls.get('tf2_to','2');
+if(!from.value&&from.value!=='')from.value='0';
+$('email').value=ls.get('tf_email','');
+const src=()=>from.value===''?null:L[+from.value];
+const dst=()=>L[+to.value];
+function chips(){$('fromChip').textContent=src()?src()[0]:'Auto';$('toChip').textContent=dst()[0];}
+from.onchange=()=>{ls.set('tf2_from',from.value);chips();};
+to.onchange=()=>{ls.set('tf2_to',to.value);chips();};
+$('email').onchange=()=>ls.set('tf_email',$('email').value.trim());
+$('swap').onclick=()=>{if(from.value===''){status('Choose a real language on the left first.',true);return;}const a=from.value;from.value=to.value;to.value=a;from.onchange();to.onchange();};
+chips();
+
+function status(t,err){const s=$('status');s.textContent=t;s.className=err?'err':'';}
+function setProg(text,pct){$('progbox').hidden=false;$('progtxt').textContent=text||'';if(typeof pct==='number')$('bar').style.width=Math.max(0,Math.min(100,pct))+'%';}
+function endProg(){$('progbox').hidden=true;$('bar').style.width='0%';$('progtxt').textContent='';}
+function updCount(){const n=$('orig').value.length;$('count').textContent=n?n.toLocaleString()+' characters':'';}
+$('orig').addEventListener('input',updCount);
+
+/* tabs */
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));
+  for(const k of['speak','audio','photo','yt'])$('p-'+k).hidden=(k!==b.dataset.t);
+});
+
+/* ---------- speak ---------- */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null,active=false,busy=false;
+function start(){
+  if(!SR){status('Live speech needs Chrome on Android or Safari on iPhone, on an https page.',true);return;}
+  const s=src();if(!s){status('For the mic, pick the language you will speak (not Auto-detect).',true);return;}
+  let fin=$('orig').value.trim();
+  rec=new SR();rec.lang=s[1];rec.continuous=true;rec.interimResults=true;rec.maxAlternatives=1;
+  rec.onresult=e=>{
+    let interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)fin+=(fin?' ':'')+r[0].transcript.trim();else interim+=r[0].transcript;}
+    $('orig').value=fin+(interim?' '+interim:'');updCount();
+  };
+  rec.onerror=e=>{
+    if(e.error==='no-speech'||e.error==='aborted')return;
+    active=false;
+    status(e.error==='not-allowed'||e.error==='service-not-allowed'?'Microphone is blocked. Allow it in the browser site settings.':e.error==='network'?'No internet for speech recognition.':e.error==='language-not-supported'?'This language is not supported for speech on your device.':'Speech error: '+e.error,true);
+  };
+  rec.onend=()=>{
+    if(active){try{rec.start();}catch(e){}return;}
+    $('mic').classList.remove('rec');$('mic').innerHTML='TAP TO<br>SPEAK';
+    if($('orig').value.trim()&&!busy)translate();
+  };
+  active=true;$('mic').classList.add('rec');$('mic').innerHTML='TAP TO<br>STOP';status('Listening in '+s[0]+'…');
+  try{rec.start();}catch(e){}
+}
+function stop(){active=false;if(rec)try{rec.stop();}catch(e){}}
+$('mic').onclick=()=>{active?stop():start();};
+
+/* ---------- recording: Whisper in the browser ---------- */
+const TF_URL='https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1/dist/transformers.web.min.js';
+let asr=null,asrName='',cancel=false,wl=null;
+async function lock(){try{wl=await navigator.wakeLock.request('screen');}catch(e){}}
+function unlock(){try{wl&&wl.release();}catch(e){}wl=null;}
+async function loadAsr(model){
+  if(asr&&asrName===model)return asr;
+  setProg('Loading the speech model. First time it downloads…',2);
+  const tf=await import(TF_URL);
+  tf.env.allowLocalModels=false;
+  try{tf.env.backends.onnx.wasm.proxy=true;}catch(e){}
+  asr=await tf.pipeline('automatic-speech-recognition',model,{progress_callback:p=>{
+    if(p.status==='progress')setProg('Downloading model… '+Math.round(p.progress)+'%',p.progress);
+    else if(p.status==='ready')setProg('Model ready.',100);
+  }});
+  asrName=model;return asr;
+}
+async function decodeAudio(file){
+  const buf=await file.arrayBuffer();
+  const AC=window.AudioContext||window.webkitAudioContext;
+  const ctx=new AC({sampleRate:16000});
+  const ab=await new Promise((res,rej)=>ctx.decodeAudioData(buf,res,rej));
+  const n=ab.length,ch=ab.numberOfChannels,out=new Float32Array(n);
+  for(let c=0;c<ch;c++){const d=ab.getChannelData(c);for(let i=0;i<n;i++)out[i]+=d[i]/ch;}
+  try{ctx.close();}catch(e){}
+  return out;
+}
+/* cut into ~30 s pieces, at the quietest spot near each end so words are not split */
+function windows(x){
+  const sr=16000,max=30*sr,fr=1600,out=[];let s=0;
+  while(s<x.length){
+    let e=Math.min(s+max,x.length);
+    if(e<x.length){
+      const from=Math.max(s+Math.floor(max*0.6),e-4*sr);let best=e,bestE=Infinity;
+      for(let i=from;i+fr<=e;i+=fr>>1){let sum=0;for(let j=i;j<i+fr;j+=4)sum+=x[j]*x[j];if(sum<bestE){bestE=sum;best=i+(fr>>1);}}
+      e=best;
+    }
+    out.push(x.subarray(s,e));s=e;
+  }
+  return out;
+}
+function rms(a){let s=0;for(let i=0;i<a.length;i+=8)s+=a[i]*a[i];return Math.sqrt(s/Math.max(1,a.length/8));}
+$('acancel').onclick=()=>{cancel=true;status('Stopping after this part…');};
+$('atrans').onclick=async()=>{
+  const f=$('afile').files[0];if(!f){status('Choose a recording first.',true);return;}
+  if(busy)return;busy=true;cancel=false;$('atrans').disabled=true;$('acancel').hidden=false;lock();
+  try{
+    const model=$('amodel').value;
+    await loadAsr(model);
+    setProg('Reading the audio file…',0);status('Reading the audio file…');
+    const x=await decodeAudio(f);
+    const mins=x.length/16000/60;
+    if(mins>60){status('This file is over an hour. Only the first hour is read.',true);}
+    const ws=windows(mins>60?x.subarray(0,16000*3600):x);
+    const s=src(),lang=s?s[4]:undefined,parts=[];
+    $('orig').value='';
+    for(let i=0;i<ws.length;i++){
+      if(cancel)break;
+      setProg('Transcribing part '+(i+1)+' of '+ws.length+'…',(i/ws.length)*100);status('Transcribing part '+(i+1)+' of '+ws.length+'…');
+      if(rms(ws[i])<0.004){continue;}
+      const opt={task:'transcribe'};if(lang)opt.language=lang;
+      const r=await asr(ws[i],opt);
+      const t=(r&&r.text||'').trim();
+      if(t){parts.push(t);$('orig').value=parts.join('\n');updCount();}
+    }
+    setProg('Done.',100);
+    status(cancel?'Stopped. Text so far is below.':parts.length?'Done. Check the text, then tap Translate.':'No speech found in this file.',!cancel&&!parts.length);
+  }catch(e){
+    status('Could not transcribe: '+(e&&e.message?e.message:'unknown error')+'. Check internet and try the Fast model.',true);
+  }finally{busy=false;$('atrans').disabled=false;$('acancel').hidden=true;unlock();setTimeout(endProg,1500);}
+};
+
+/* ---------- photo: Tesseract in the browser ---------- */
+let picUrl='';
+$('pfile').onchange=()=>{
+  const f=$('pfile').files[0];if(picUrl)URL.revokeObjectURL(picUrl);
+  if(!f){$('pic').style.display='none';return;}
+  picUrl=URL.createObjectURL(f);$('pic').src=picUrl;$('pic').style.display='block';
+};
+async function loadTess(){
+  if(window.Tesseract)return;
+  await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';s.onload=res;s.onerror=()=>rej(new Error('Could not load the photo reader. Check internet.'));document.head.appendChild(s);});
+}
+async function prepImage(file){
+  const url=URL.createObjectURL(file);
+  const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(new Error('Cannot read this image.'));i.src=url;});
+  const k=Math.min(1,2200/Math.max(img.naturalWidth,img.naturalHeight));
+  const w=Math.round(img.naturalWidth*k),h=Math.round(img.naturalHeight*k);
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  const x=c.getContext('2d');try{x.filter='grayscale(1) contrast(1.25)';}catch(e){}
+  x.drawImage(img,0,0,w,h);URL.revokeObjectURL(url);return c;
+}
+$('pread').onclick=async()=>{
+  const f=$('pfile').files[0];if(!f){status('Choose a photo first.',true);return;}
+  const s=src();if(!s){status('Pick the language of the text in the photo (not Auto-detect).',true);return;}
+  if(busy)return;busy=true;$('pread').disabled=true;
+  try{
+    setProg('Loading the photo reader…',3);status('Reading the photo…');
+    await loadTess();
+    let code=s[3];if($('alsoEng').checked&&code!=='eng')code+='+eng';
+    const canvas=await prepImage(f);
+    const r=await Tesseract.recognize(canvas,code,{logger:m=>{
+      if(m.status==='recognizing text')setProg('Reading text… '+Math.round(m.progress*100)+'%',m.progress*100);
+      else if(m.status)setProg(m.status.replace(/_/g,' ')+'…',m.progress?m.progress*100:5);
+    }});
+    const t=(r.data.text||'').trim();
+    if(!t){status('No text found. Try a clearer, closer, well-lit photo.',true);}
+    else{$('orig').value=t;updCount();status('Done. Check the text, then tap Translate.');}
+  }catch(e){status('Could not read the photo: '+(e&&e.message?e.message:'unknown error'),true);}
+  finally{busy=false;$('pread').disabled=false;setTimeout(endProg,1200);}
+};
+$('pclaude').onclick=()=>{
+  copy('Extract all the text from the photo I attach, exactly as written. Keep the original language and line breaks. Do not translate or add anything.').then(()=>{
+    $('pnote').textContent='Copied. Open the Claude app, attach the photo, paste this and send. This uses your free Claude chats.';
+  });
+};
+
+/* ---------- YouTube ---------- */
+function ytId(u){const m=(u||'').match(/(?:youtu\.be\/|[?&]v=|shorts\/|embed\/|live\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null;}
+$('ylink').addEventListener('input',()=>{
+  const id=ytId($('ylink').value),a=$('yopen');
+  if(id){a.href='https://www.youtube.com/watch?v='+id;a.style.display='inline-block';}else a.style.display='none';
+});
+$('ypaste').onclick=async()=>{
+  try{
+    const t=await navigator.clipboard.readText();
+    if(!t.trim()){status('Clipboard is empty. Copy the transcript first.',true);return;}
+    $('orig').value=t.replace(/^\s*\d{1,2}:\d{2}(?::\d{2})?\s*$/gm,'').replace(/\n{2,}/g,'\n').trim();updCount();
+    status('Transcript pasted. Choose the language above, then tap Translate.');
+  }catch(e){status('Paste is not allowed here. Long-press the big text box below and choose Paste.',true);}
+};
+
+/* ---------- translate ---------- */
+function chunks(t){
+  const parts=t.match(/[^.!?؟۔।\n]+[.!?؟۔।]*/g)||[t],out=[];let cur='';
+  for(let p of parts){
+    p=p.trim();if(!p)continue;
+    while(p.length>450){const cut=p.lastIndexOf(' ',450);const k=cut>100?cut:450;if(cur){out.push(cur);cur='';}out.push(p.slice(0,k));p=p.slice(k).trim();}
+    if((cur+' '+p).trim().length>450){out.push(cur);cur=p;}else cur=(cur+' '+p).trim();
+  }
+  if(cur)out.push(cur);return out;
+}
+function decode(s){const t=document.createElement('textarea');t.innerHTML=s;return t.value;}
+async function mm(q,srcCode,dstCode){
+  const email=$('email').value.trim();
+  const u='https://api.mymemory.translated.net/get?q='+encodeURIComponent(q)+'&langpair='+encodeURIComponent(srcCode+'|'+dstCode)+(email?'&de='+encodeURIComponent(email):'');
+  const r=await fetch(u);const d=await r.json();
+  if(String(d.responseStatus)!=='200'||d.quotaFinished)throw new Error(d.quotaFinished||String(d.responseStatus)==='429'?'LIMIT':(d.responseDetails||'Translation failed'));
+  return decode(d.responseData.translatedText||'');
+}
+async function translate(){
+  const text=$('orig').value.trim();if(!text){status('Nothing to translate yet.',true);return;}
+  const s=src(),d=dst(),sc=s?s[2]:'Autodetect';
+  busy=true;status('Translating…');$('trans').textContent='';
+  const out=[];
+  try{
+    if(s&&sc===d[2])out.push(text);
+    else{
+      const cs=chunks(text);
+      for(let i=0;i<cs.length;i++){
+        if(cs.length>1)setProg('Translating part '+(i+1)+' of '+cs.length+'…',(i/cs.length)*100);
+        out.push(await mm(cs[i],sc,d[2]));
+        $('trans').textContent=out.join(' ');$('c2').hidden=false;
+      }
+    }
+    $('trans').textContent=out.join(' ');$('c2').hidden=false;$('claudeNote').textContent='';status('Done.');
+  }catch(e){
+    if(out.length){$('trans').textContent=out.join(' ');$('c2').hidden=false;}
+    status(e.message==='LIMIT'?'Free daily limit reached'+(out.length?' (translated up to here)':'')+'. Add your email in Settings, or use "Better translation with Claude".':e.message==='Failed to fetch'?'No internet connection.':e.message,true);
+  }finally{busy=false;endProg();}
+}
+$('retr').onclick=()=>{if(!busy)translate();};
+$('clear').onclick=()=>{$('orig').value='';$('trans').textContent='';$('c2').hidden=true;updCount();status('Cleared.');};
+async function copy(t){try{await navigator.clipboard.writeText(t);status('Copied.');}catch(e){status('Copy not allowed here. Select the text and copy it.',true);}}
+$('copyO').onclick=()=>copy($('orig').value);
+$('copyT').onclick=()=>copy($('trans').textContent);
+function save(text,name){
+  if(!text.trim()){status('Nothing to save yet.',true);return;}
+  const b=new Blob([text],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);status('Saved as '+name+'.');
+}
+$('dlO').onclick=()=>save($('orig').value,'text.txt');
+$('dlT').onclick=()=>save($('trans').textContent,'translation.txt');
+$('speak').onclick=()=>{
+  const t=$('trans').textContent;if(!t||!window.speechSynthesis)return;
+  speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang=dst()[1];speechSynthesis.speak(u);
+};
+$('claude').onclick=()=>{
+  const s=src();
+  const p='Translate this '+(s?s[0]:'')+' text faithfully into '+dst()[0]+'. Keep names, numbers and meaning exact, add nothing:\n\n'+$('orig').value.trim();
+  copy(p).then(()=>{$('claudeNote').textContent='Copied. Open the Claude app and paste it. This uses your free Claude chats, not a paid key.';});
+};
+updCount();
+
+/* ---------- owner controls: reads config.json from the owner's site ---------- */
+/* Optional: put the full address of YOUR config.json here so even copies of this file obey it,
+   e.g. 'https://yourname.github.io/tarjuman/config.json'. Leave empty to use the config.json next to this page. */
+const CONFIG_URL='';
+const GRACE_MS=24*3600*1000;
+async function derive(code,salt){
+  const enc=new TextEncoder();
+  const k=await crypto.subtle.importKey('raw',enc.encode(code),'PBKDF2',false,['deriveBits']);
+  const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:enc.encode(salt),iterations:100000,hash:'SHA-256'},k,256);
+  return [...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+const normCode=c=>c.toUpperCase().replace(/[^A-Z0-9]/g,'');
+const expired=e=>!!(e&&e.expires&&new Date(e.expires+'T23:59:59')<new Date());
+function showGate(title,msg,opts){
+  $('gate').hidden=false;$('gtitle').textContent=title;$('gmsg').textContent=msg||'';
+  $('gcode').hidden=!(opts&&opts.code);$('gok').hidden=!(opts&&opts.code);$('gretry').hidden=!(opts&&opts.retry);
+  if(opts&&opts.code)setTimeout(()=>$('gcode').focus(),50);
+}
+function openApp(cfg){
+  $('gate').hidden=true;
+  if(cfg&&cfg.message){$('banner').textContent=cfg.message;$('banner').hidden=false;}
+}
+let gateCfg=null,tries=0;
+async function runGate(){
+  const url=CONFIG_URL||(/^https?:$/.test(location.protocol)?'config.json':'');
+  if(!url){openApp();return;}
+  showGate('Checking access…','');
+  let cfg=null;
+  try{
+    const r=await fetch(url+(url.includes('?')?'&':'?')+'t='+Date.now(),{cache:'no-store'});
+    if(r.status===404&&!CONFIG_URL){openApp();return;}
+    if(!r.ok)throw new Error('bad');
+    cfg=await r.json();
+  }catch(e){cfg=null;}
+  if(!cfg){
+    if(Date.now()-(+ls.get('tj_ok','0'))<GRACE_MS){openApp();return;}
+    showGate('Internet needed','Connect to the internet to start the app.',{retry:true});return;
+  }
+  gateCfg=cfg;
+  if(cfg.enabled===false){showGate('Closed',cfg.closedMessage||'This app is closed for now.',{retry:true});return;}
+  if(cfg.requireCode){
+    const saved=ls.get('tj_hash','');
+    if((cfg.codes||[]).some(c=>c.hash===saved&&!expired(c))){ls.set('tj_ok',String(Date.now()));openApp(cfg);return;}
+    showGate('Access code',saved?'Your code is no longer valid. Enter a new one.':'Enter the code you were given.',{code:true,retry:false});return;
+  }
+  ls.set('tj_ok',String(Date.now()));openApp(cfg);
+}
+async function submitCode(){
+  const raw=normCode($('gcode').value);if(!raw||!gateCfg)return;
+  if(!window.crypto||!crypto.subtle){showGate('Cannot check code','Open this app from its https link.',{retry:true});return;}
+  $('gok').disabled=true;
+  try{
+    const h=await derive(raw,gateCfg.salt||'');
+    const hit=(gateCfg.codes||[]).find(c=>c.hash===h&&!expired(c));
+    if(hit){ls.set('tj_hash',h);ls.set('tj_ok',String(Date.now()));openApp(gateCfg);}
+    else{tries++;$('gmsg').textContent=(expired((gateCfg.codes||[]).find(c=>c.hash===h))?'This code has expired.':'Wrong code.')+' Check it and try again.';
+      if(tries>=5){$('gok').disabled=true;setTimeout(()=>{$('gok').disabled=false;tries=0;},20000);$('gmsg').textContent='Too many tries. Wait 20 seconds.';}}
+  }finally{if(tries<5)$('gok').disabled=false;}
+}
+$('gok').onclick=submitCode;
+$('gcode').addEventListener('keydown',e=>{if(e.key==='Enter')submitCode();});
+$('gretry').onclick=runGate;
+$('signout').onclick=()=>{ls.set('tj_hash','');ls.set('tj_ok','0');runGate();};
+runGate();
+})();
+</script>
+</body>
+</html>
