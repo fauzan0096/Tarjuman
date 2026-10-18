@@ -18,13 +18,13 @@ async function fetchBoth(){let online=true;const f=u=>fetch(u,{cache:'no-store'}
 async function tryOpen(code){let d;try{d=await fetchBoth()}catch(e){return {err:'Internet chahiye (pehli baar)'}}
  if(!d.online&&Date.now()-(+ls.g('qr_ok')||0)>WEEK)return {err:'Internet se jud kar dobara kholein'};
  for(const e of d.users){try{const kk=await dk(code,b64(e.s));const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(e.i)},kk,b64(e.w));
-  const mk=await crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt']);const x=b64(d.enc);
+  const rw=new Uint8Array(raw);const mk=await crypto.subtle.importKey('raw',rw.slice(0,32),'AES-GCM',false,['decrypt']);const x=b64(d.enc);
   const html=new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:x.slice(0,12)},mk,x.slice(12)));
-  if(d.online)ls.s('qr_ok',Date.now());return {html}}catch(_){}}
+  if(d.online)ls.s('qr_ok',Date.now());return {html,admin:rw[32]===1}}catch(_){}}
  return {bad:1,online:d.online};}
 function run(h){document.open();document.write(h);document.close();}
 async function enter(code,auto){$('msg').textContent='...';const r=await tryOpen(code);
- if(r.html){ls.s('qr_code',code);run(r.html);return}
+ if(r.html){ls.s('qr_code',code);window.__admin=r.admin;run(r.html);return}
  if(r.bad&&r.online){ls.d('qr_code');$('msg').textContent=auto?'Access band kar diya gaya hai.':'Galat code';}else $('msg').textContent=r.err||'Galat code';
  $('lock').hidden=false;}
 $('go').onclick=()=>{const v=$('c').value.trim();if(v)enter(v,false)};$('c').onkeydown=e=>{if(e.key==='Enter')$('go').click()};
