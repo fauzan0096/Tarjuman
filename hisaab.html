@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e9f6e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Mera Hisaab</title>
+<link rel="manifest" href="hisaab-manifest.json">
+<link rel="icon" href="hisaab-192.png">
+<link rel="apple-touch-icon" href="hisaab-192.png">
+<style>
+:root{--bg:#f4f6f3;--card:#fff;--tx:#14231c;--mu:#6b7a72;--ac:#0e9f6e;--ac2:#0b7f58;--in:#0e9f6e;--out:#e5484d;--rem:#3b82f6;--ud:#e8890c;--bd:#e3e8e4;--sh:0 1px 3px rgba(20,35,28,.08)}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1512;--card:#18211c;--tx:#e8efe9;--mu:#8fa196;--ac:#2fc48d;--ac2:#25a574;--in:#2fc48d;--out:#ff6b70;--rem:#6aa3ff;--ud:#f5a642;--bd:#27332c;--sh:none}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+#app{max-width:560px;margin:0 auto;padding:0 14px}
+header{display:flex;align-items:center;gap:8px;padding:calc(12px + env(safe-area-inset-top)) 0 8px}
+header h1{font-size:20px;margin:0;flex:1}
+.ib{border:0;background:var(--card);color:var(--tx);width:38px;height:38px;border-radius:12px;box-shadow:var(--sh);font-size:18px;cursor:pointer}
+.card{background:var(--card);border-radius:16px;padding:14px;box-shadow:var(--sh);margin:10px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid .card{margin:0}
+.lab{color:var(--mu);font-size:12px}
+.big{font-size:20px;font-weight:700;margin-top:2px;word-break:break-word}
+.in{color:var(--in)}.out{color:var(--out)}.rem{color:var(--rem)}.ud{color:var(--ud)}
+.mnav{display:flex;align-items:center;justify-content:space-between;margin:6px 0}
+.mnav b{font-size:16px}
+.mnav button{border:0;background:var(--card);color:var(--tx);width:38px;height:34px;border-radius:10px;font-size:16px;box-shadow:var(--sh)}
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd);cursor:pointer}
+.row:last-child{border-bottom:0}
+.ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:18px;background:var(--bg);flex:none}
+.rt{flex:1;min-width:0}
+.rt b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rt small{color:var(--mu);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ra{text-align:right;flex:none}
+.ra b{display:block}.ra small{color:var(--mu)}
+.dh{font-size:12px;color:var(--mu);margin:12px 2px 2px;font-weight:600}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--bd);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav div{display:flex;width:100%;max-width:560px}
+nav button{flex:1;border:0;background:none;color:var(--mu);padding:8px 0 7px;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+nav button span{font-size:19px}
+nav button.on{color:var(--ac);font-weight:700}
+.fab{position:fixed;right:18px;bottom:calc(78px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;border:0;background:var(--ac);color:#fff;font-size:30px;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:6;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:999px;padding:6px 11px;font-size:13px;cursor:pointer}
+.chip.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.bar{height:8px;background:var(--bd);border-radius:6px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--ac);border-radius:6px}
+.bar.warn i{background:var(--out)}
+.pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg);color:var(--mu)}
+.pill.bad{background:rgba(229,72,77,.15);color:var(--out)}
+.btn{border:0;background:var(--ac);color:#fff;border-radius:12px;padding:12px 16px;font-size:15px;font-weight:600;cursor:pointer;width:100%}
+.btn.sec{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
+.btn.dan{background:var(--out)}
+.btn.sm{width:auto;padding:8px 12px;font-size:13px}
+.ban{background:rgba(232,137,12,.14);color:var(--tx);border-radius:12px;padding:10px 12px;margin:10px 0;font-size:13px;border:1px solid rgba(232,137,12,.35)}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:14px 14px calc(18px + env(safe-area-inset-bottom))}
+.sheet h2{margin:0 0 8px;font-size:17px;display:flex;justify-content:space-between;align-items:center}
+input,select{width:100%;font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:11px 12px;outline:none}
+input:focus{border-color:var(--ac)}
+label{display:block;font-size:12px;color:var(--mu);margin:10px 0 4px}
+.amt{display:flex;gap:8px}
+.amt input{font-size:24px;font-weight:700}
+.amt button{flex:none;width:96px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-weight:700;font-size:16px}
+.seg{display:flex;background:var(--card);border-radius:12px;padding:3px;margin-bottom:6px;border:1px solid var(--bd)}
+.seg button{flex:1;border:0;background:none;color:var(--mu);padding:8px 2px;border-radius:9px;font-size:13px;font-weight:600}
+.seg button.on{background:var(--ac);color:#fff}
+.hint{font-size:12px;color:var(--mu);margin-top:4px}
+.toast{position:fixed;left:50%;bottom:calc(140px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:12px;z-index:50;font-size:14px;max-width:90%;text-align:center}
+.empty{text-align:center;color:var(--mu);padding:26px 10px}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th,.tbl td{padding:6px 4px;text-align:right;border-bottom:1px solid var(--bd)}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl th{color:var(--mu);font-weight:600}
+svg text{fill:var(--mu);font-size:9px}
+.cl{max-height:50vh;overflow:auto;margin-top:8px}
+h3{font-size:14px;margin:0 0 6px}
+.sp{display:flex;justify-content:space-between;gap:8px;padding:5px 0}
+</style>
+</head>
+<body>
+<div id="app"><header><h1 id="ttl">Mera Hisaab</h1><button class="ib" data-a="setg" aria-label="Settings">⚙️</button></header><div id="main"></div></div>
+<button class="fab" data-a="add" aria-label="Naya">+</button>
+<nav><div id="nav"></div></nav>
+<div id="ovs"></div>
+<script>
+'use strict';
+const LS='hs_data_v1';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const FALLBACK={USD:1,SAR:3.75,INR:88,AED:3.6725,PKR:280,BDT:122,EUR:.92,GBP:.78,KWD:.307,QAR:3.64,OMR:.385,BHD:.376,JOD:.709,EGP:48,TRY:41,MYR:4.2,IDR:16500,PHP:57,NPR:140,LKR:300,CAD:1.38,AUD:1.52,CNY:7.15,JPY:150,SGD:1.3,ZAR:18,NGN:1500,RUB:90,CHF:.85,KRW:1400,THB:34,MAD:9.5,DZD:135,TND:3.1,LBP:89500,IQD:1310,YER:250,SDG:600,ETB:120,KES:129,UGX:3700,TZS:2500,AFN:70,MVR:15.4,BRL:5.4,MXN:19,NZD:1.65,SEK:10.5,NOK:10.8,DKK:6.9,PLN:3.9,HKD:7.8};
+const CATS_OUT=[['khana','🍽️','Khana'],['kiraya','🏠','Kiraya'],['net','📱','Mobile/Net'],['safar','🚕','Safar'],['kapde','👕','Kapde'],['sehat','💊','Sehat'],['taleem','📚','Taleem'],['sadqa','🤲','Sadqa/Zakat'],['tohfa','🎁','Tohfa'],['samaan','🛒','Samaan'],['bill','🧾','Bill'],['anya','➕','Anya']];
+const CATS_IN=[['tankhwah','💼','Tankhwah'],['business','🏪','Business'],['tohfa','🎁','Tohfa mila'],['anya','➕','Anya']];
+const UDK=[['diya','➡️','Maine diya',1],['liya','⬅️','Maine liya',-1],['wapas_mila','↩️','Wapas mila',-1],['wapas_diya','↪️','Maine wapas diya',1]];
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const R3=x=>Math.round(x*1000)/1000;
+
+/* ---------- state ---------- */
+function fresh(){return{v:1,base:'INR',recent:['SAR','INR','USD'],entries:[],fx:{r:{},t:0,src:''},budget:0,goal:0,lastBackup:0,created:Date.now()}}
+let S=load();
+function load(){try{const j=JSON.parse(localStorage.getItem(LS));if(j&&j.v&&Array.isArray(j.entries))return Object.assign(fresh(),j)}catch(e){}return fresh()}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){toast('Save nahi hua! Phone ki jagah check karo, aur backup lo.')}}
+const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const UI={tab:'home',m:today().slice(0,7),y:+today().slice(0,4),f:'all',q:''};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+/* ---------- money helpers ---------- */
+function num(s){if(typeof s==='number')return isFinite(s)?s:0;s=String(s||'').trim().replace(/[٠-٩]/g,d=>d.charCodeAt(0)-1632).replace(/[۰-۹]/g,d=>d.charCodeAt(0)-1776).replace(/٫/g,'.').replace(/٬/g,'');if(/^\d+,\d{1,2}$/.test(s))s=s.replace(',','.');s=s.replace(/,/g,'');const n=parseFloat(s);return isFinite(n)?n:0}
+const rate=c=>S.fx.r[c]||FALLBACK[c]||0;
+const xrate=(a,b)=>{const ra=rate(a),rb=rate(b);return ra&&rb?rb/ra:0};
+const nfc={};
+function nf(c){if(nfc[c])return nfc[c];let d=2;try{d=new Intl.NumberFormat('en-US',{style:'currency',currency:c}).resolvedOptions().maximumFractionDigits}catch(e){}
+ return nfc[c]=new Intl.NumberFormat(c==='INR'?'en-IN':'en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
+const fmt=(a,c)=>nf(c).format(a)+' '+c;
+const fmtN=(a,c)=>nf(c).format(a);
+function bv(e){if(e.c===S.base)return e.a;if(e.b===S.base&&e.r)return e.a*e.r;const rb=rate(S.base);return e.u&&rb?e.a*e.u*rb:0}
+let DN=null;
+function cname(c){try{DN=DN||new Intl.DisplayNames(['en'],{type:'currency'});return DN.of(c)||c}catch(e){return c}}
+function allCurs(){const set=new Set([...Object.keys(FALLBACK),...Object.keys(S.fx.r)]);const out=[];set.forEach(c=>{if(/^[A-Z]{3}$/.test(c)){try{new Intl.NumberFormat('en-US',{style:'currency',currency:c});out.push(c)}catch(e){}}});return out.sort()}
+function bumpRecent(c){S.recent=[c,...S.recent.filter(x=>x!==c)].slice(0,8)}
+
+/* ---------- rates ---------- */
+async function fetchJ(u){const ac=new AbortController();const t=setTimeout(()=>ac.abort(),9000);try{const r=await fetch(u,{cache:'no-store',signal:ac.signal});if(!r.ok)throw 0;return await r.json()}finally{clearTimeout(t)}}
+async function refreshRates(manual){
+ try{const j=await fetchJ('https://open.er-api.com/v6/latest/USD');if(j&&j.rates&&j.rates.INR){S.fx={r:j.rates,t:Date.now(),src:'open.er-api.com'};save();if(manual)toast('Rate update ho gaye ✔');render();return true}}catch(e){}
+ try{const j=await fetchJ('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');if(j&&j.usd){const r={};Object.keys(j.usd).forEach(k=>{if(/^[a-z]{3}$/.test(k)&&j.usd[k]>0)r[k.toUpperCase()]=j.usd[k]});if(r.INR){S.fx={r,t:Date.now(),src:'currency-api'};save();if(manual)toast('Rate update ho gaye ✔');render();return true}}}catch(e){}
+ if(manual)toast('Rate nahi mile. Internet check karo; purane rate chalte rahenge.');return false}
+const rateAge=()=>S.fx.t?Math.floor((Date.now()-S.fx.t)/36e5):null;
+
+/* ---------- data helpers ---------- */
+const sorted=()=>S.entries.slice().sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:(a.id<b.id?1:-1));
+function catInfo(e){const l=e.t==='in'?CATS_IN:CATS_OUT;return l.find(x=>x[0]===e.cat)||['','❔','Anya']}
+function mSum(m){const s={inc:0,out:0,rem:0,cats:{},n:0};S.entries.forEach(e=>{if(!e.d.startsWith(m))return;const v=bv(e);if(e.t==='in'){s.inc+=v;s.n++}else if(e.t==='out'){s.out+=v;s.cats[e.cat]=(s.cats[e.cat]||0)+v;s.n++}else if(e.t==='rem'){s.rem+=v;s.n++}});return s}
+function monthLbl(m){return MON[+m.slice(5)-1]+' '+m.slice(0,4)}
+function shiftM(m,d){let y=+m.slice(0,4),x=+m.slice(5)-1+d;y+=Math.floor(x/12);x=((x%12)+12)%12;return y+'-'+String(x+1).padStart(2,'0')}
+function dLbl(d){const t=today();if(d===t)return 'Aaj';if(d===new Date(Date.now()-new Date().getTimezoneOffset()*6e4-864e5).toISOString().slice(0,10))return 'Kal';return +d.slice(8)+' '+MON[+d.slice(5,7)-1]+' '+d.slice(0,4)}
+function entryTitle(e){if(e.t==='rem')return '🏠 Ghar bheja'+(e.to?' → '+esc(e.to):'');if(e.t==='ud')return esc(e.person)+' · '+esc((UDK.find(k=>k[0]===e.k)||[])[2]||'');return esc(catInfo(e)[2])}
+function entryIco(e){if(e.t==='rem')return '🏠';if(e.t==='ud')return (UDK.find(k=>k[0]===e.k)||[0,'🤝'])[1];return catInfo(e)[1]}
+function entryRow(e){
+ const sign=e.t==='in'?'+':e.t==='ud'?'':'-';const cls=e.t==='in'?'in':e.t==='out'?'out':e.t==='rem'?'rem':'ud';
+ const b=bv(e);const sub=e.c!==S.base&&b?'≈ '+fmt(b,S.base):'';
+ let note=esc(e.note||'');if(e.t==='rem'&&e.ra)note=(note?note+' · ':'')+'mile '+esc(fmt(e.ra,e.rc));
+ return `<div class="row" data-a="edit" data-id="${e.id}"><div class="ico">${entryIco(e)}</div><div class="rt"><b>${e.t==='ud'?esc(e.person):e.t==='rem'?'Ghar bheja'+(e.to?' → '+esc(e.to):''):esc(catInfo(e)[2])}</b><small>${e.t==='ud'?esc((UDK.find(k=>k[0]===e.k)||[])[2]||'')+(note?' · '+note:''):note||dLbl(e.d)}</small></div><div class="ra"><b class="${cls}">${sign}${esc(fmt(e.a,e.c))}</b><small>${esc(sub)}</small></div></div>`}
+function groupedList(list){if(!list.length)return '<div class="empty">Abhi kuch nahi hai.<br>Neeche <b>+</b> dabao.</div>';let h='',last='';list.forEach(e=>{if(e.d!==last){last=e.d;h+=`<div class="dh">${dLbl(e.d)}</div>`}h+=entryRow(e)});return h}
+
+/* ---------- toast / overlays ---------- */
+let tt;function toast(m){let t=$('.toast');if(t)t.remove();t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);clearTimeout(tt);tt=setTimeout(()=>t.remove(),3200)}
+let pendingReload=false;
+function openOv(html){const o=document.createElement('div');o.className='ov';o.innerHTML='<div class="sheet">'+html+'</div>';o.addEventListener('click',e=>{if(e.target===o)closeOv(o)});$('#ovs').appendChild(o);return o}
+function closeOv(o){(o||$('#ovs').lastElementChild)&&(o||$('#ovs').lastElementChild).remove();if(pendingReload&&!$('#ovs').children.length)location.reload()}
+const topOv=()=>$('#ovs').lastElementChild;
+
+/* ---------- views ---------- */
+function render(){
+ const tabs=[['home','🏠','Ghar'],['list','📒','Hisaab'],['rem','✈️','Bheja'],['ud','🤝','Udhaar'],['year','📊','Saal']];
+ $('#nav').innerHTML=tabs.map(t=>`<button data-a="tab" data-t="${t[0]}" class="${UI.tab===t[0]?'on':''}"><span>${t[1]}</span>${t[2]}</button>`).join('');
+ $('#ttl').textContent={home:'Mera Hisaab',list:'Hisaab',rem:'Ghar bheja',ud:'Udhaar',year:'Saal ka khulasa'}[UI.tab];
+ $('#main').innerHTML={home:vHome,list:vList,rem:vRem,ud:vUd,year:vYear}[UI.tab]();
+ if(UI.tab==='list')drawList();
+}
+function mnav(){return `<div class="mnav"><button data-a="mm" data-d="-1">‹</button><b>${monthLbl(UI.m)}</b><button data-a="mm" data-d="1">›</button></div>`}
+function vHome(){
+ const s=mSum(UI.m),bal=s.inc-s.out-s.rem,B=S.base;let h='';
+ const age=rateAge();
+ if(S.entries.length&&(Date.now()-(S.lastBackup||S.created)>(S.lastBackup?30:7)*864e5))h+=`<div class="ban">💾 Backup purana hai. Settings ⚙️ mein "Backup lo" dabao taaki data na jaaye.</div>`;
+ if(age===null)h+=`<div class="ban">ℹ️ Abhi andaaze wale rate chal rahe hain. Internet par app kholo to asli rate aa jaayenge.</div>`;
+ else if(age>72)h+=`<div class="ban">ℹ️ Rate ${Math.floor(age/24)} din purane hain. <a href="#" data-a="rr" style="color:var(--ac)">Abhi update karo</a></div>`;
+ const od=udOverdue();if(od.length)h+=`<div class="ban">⏰ Udhaar ki tareekh nikal gayi: ${od.map(x=>esc(x)).join(', ')}</div>`;
+ h+=mnav();
+ h+=`<div class="grid"><div class="card"><div class="lab">Aamdani</div><div class="big in">${esc(fmt(s.inc,B))}</div></div><div class="card"><div class="lab">Kharcha</div><div class="big out">${esc(fmt(s.out,B))}</div></div><div class="card"><div class="lab">Ghar bheja</div><div class="big rem">${esc(fmt(s.rem,B))}</div></div><div class="card"><div class="lab">Bacha</div><div class="big ${bal<0?'out':''}">${esc(fmt(bal,B))}</div></div></div>`;
+ if(S.budget>0){const p=Math.min(100,s.out/S.budget*100);h+=`<div class="card"><div class="sp"><b>Kharcha budget</b><span class="lab">${esc(fmt(s.out,B))} / ${esc(fmt(S.budget,B))}</span></div><div class="bar ${s.out>S.budget?'warn':''}"><i style="width:${p}%"></i></div></div>`}
+ if(S.goal>0){const p=Math.max(0,Math.min(100,bal/S.goal*100));h+=`<div class="card"><div class="sp"><b>Bachat ka target</b><span class="lab">${esc(fmt(bal,B))} / ${esc(fmt(S.goal,B))}</span></div><div class="bar"><i style="width:${p}%"></i></div></div>`}
+ const cats=Object.entries(s.cats).sort((a,b)=>b[1]-a[1]).slice(0,5);
+ if(cats.length){h+='<div class="card"><h3>Kharcha kahan gaya</h3>'+cats.map(([k,v])=>{const ci=CATS_OUT.find(x=>x[0]===k)||['','❔','Anya'];return `<div style="margin:8px 0"><div class="sp" style="padding:0"><span>${ci[1]} ${ci[2]}</span><span>${esc(fmt(v,B))}</span></div><div class="bar"><i style="width:${s.out?v/s.out*100:0}%"></i></div></div>`}).join('')+'</div>'}
+ const rec=sorted().filter(e=>e.d.startsWith(UI.m)).slice(0,6);
+ h+=`<div class="card"><h3>Aakhri entries</h3>${rec.length?rec.map(entryRow).join(''):'<div class="empty">Is mahine koi entry nahi.<br>Neeche <b>+</b> dabao.</div>'}</div>`;
+ return h}
+function vList(){
+ const f=[['all','Sab'],['in','Aamdani'],['out','Kharcha'],['rem','Bheja'],['ud','Udhaar']];
+ return mnav()+`<input id="q" placeholder="Dhundo (note, naam, category)" value="${esc(UI.q)}" oninput="UI.q=this.value;drawList()"><div class="chips">${f.map(x=>`<button class="chip ${UI.f===x[0]?'on':''}" data-a="flt" data-f="${x[0]}">${x[1]}</button>`).join('')}</div><div class="card" id="lst"></div>`}
+function drawList(){const el=$('#lst');if(!el)return;const q=UI.q.trim().toLowerCase();let l=sorted().filter(e=>e.d.startsWith(UI.m)&&(UI.f==='all'||e.t===UI.f));if(q)l=l.filter(e=>[e.note,e.person,e.to,e.cat,catInfo(e)[2],e.c].join(' ').toLowerCase().includes(q));el.innerHTML=groupedList(l)}
+function vRem(){
+ const l=sorted().filter(e=>e.t==='rem'&&e.d.startsWith(String(UI.y)));
+ const B=S.base;let tot=0;const by={};const pairs={};
+ l.forEach(e=>{tot+=bv(e);by[e.c]=(by[e.c]||0)+e.a;if(e.ra&&e.rc&&e.a){const k=e.c+'→'+e.rc;const p=pairs[k]||(pairs[k]={s:0,r:0,n:0,mn:1e18,mx:0,c:e.c,rc:e.rc});p.s+=e.a;p.r+=e.ra;p.n++;const r=e.ra/e.a;p.mn=Math.min(p.mn,r);p.mx=Math.max(p.mx,r)}});
+ let h=ynav();
+ h+=`<div class="card"><div class="lab">${UI.y} mein ghar bheja (${l.length} baar)</div><div class="big rem">${esc(fmt(tot,B))}</div>${Object.keys(by).map(c=>`<div class="lab">${esc(fmt(by[c],c))}</div>`).join('')}</div>`;
+ const ps=Object.values(pairs);
+ if(ps.length)h+='<div class="card"><h3>Rate ka hisaab</h3>'+ps.map(p=>{const avg=p.r/p.s,mk=xrate(p.c,p.rc);const d=mk?(avg/mk-1)*100:null;return `<div style="margin:8px 0"><b>1 ${p.c} = ${avg.toFixed(3)} ${p.rc}</b> <span class="lab">(average)</span><div class="lab">Sabse achha ${p.mx.toFixed(3)} · sabse kam ${p.mn.toFixed(3)}${mk?` · aaj ka market ≈ ${mk.toFixed(3)}`:''}</div>${d!==null?`<div class="lab">Aapka rate market se ${d>=0?'<span class="in">'+d.toFixed(1)+'% behtar':'<span class="out">'+Math.abs(d).toFixed(1)+'% kam'}</span></div>`:''}</div>`}).join('')+'</div>';
+ h+=`<button class="btn" data-a="add" data-t="rem">✈️ Ghar paise bheje</button>`;
+ h+=`<div class="card">${l.length?l.map(entryRow).join(''):'<div class="empty">Is saal koi bheja hua paisa darj nahi.</div>'}</div>`;
+ return h}
+function ynav(){return `<div class="mnav"><button data-a="yy" data-d="-1">‹</button><b>${UI.y}</b><button data-a="yy" data-d="1">›</button></div>`}
+/* udhaar */
+function udPeople(){const P={};S.entries.forEach(e=>{if(e.t!=='ud')return;const k=e.person.trim();const p=P[k]||(P[k]={name:k,bal:{},due:'',last:'',n:0});const sg=(UDK.find(x=>x[0]===e.k)||[0,0,0,1])[3];p.bal[e.c]=R3((p.bal[e.c]||0)+sg*e.a);p.n++;if(e.d>p.last)p.last=e.d;if(e.due&&(e.k==='diya'||e.k==='liya')&&(!p.due||e.due<p.due))p.due=e.due});Object.values(P).forEach(p=>{p.open=Object.values(p.bal).some(v=>Math.abs(v)>=.001)});return P}
+function udOverdue(){const t=today();return Object.values(udPeople()).filter(p=>p.open&&p.due&&p.due<t).map(p=>p.name)}
+function vUd(){
+ const P=Object.values(udPeople()).sort((a,b)=>(b.open-a.open)||(a.last<b.last?1:-1));
+ const get={},give={};P.forEach(p=>Object.entries(p.bal).forEach(([c,v])=>{if(v>=.001)get[c]=R3((get[c]||0)+v);else if(v<=-.001)give[c]=R3((give[c]||0)-v)}));
+ const line=o=>Object.keys(o).length?Object.entries(o).map(([c,v])=>`<div class="big" style="font-size:16px">${esc(fmt(v,c))}</div>`).join(''):'<div class="lab">—</div>';
+ let h=`<div class="grid"><div class="card"><div class="lab">Aapko milna hai</div>${line(get)}</div><div class="card"><div class="lab">Aapko dena hai</div>${line(give)}</div></div><div style="height:10px"></div><button class="btn" data-a="add" data-t="ud">🤝 Naya udhaar</button><div class="card">`;
+ h+=P.length?P.map(p=>{const bs=Object.entries(p.bal).filter(([c,v])=>Math.abs(v)>=.001);const od=p.open&&p.due&&p.due<today();return `<div class="row" data-a="person" data-n="${esc(p.name)}"><div class="ico">👤</div><div class="rt"><b>${esc(p.name)}</b><small>${p.open?(p.due?'Tareekh: '+esc(dLbl(p.due)):'Khula hai'):'Hisaab saaf ✔'}</small></div><div class="ra">${bs.length?bs.map(([c,v])=>`<b class="${v>0?'in':'out'}">${v>0?'+':'-'}${esc(fmt(Math.abs(v),c))}</b>`).join(''):'<b>0</b>'}${od?'<span class="pill bad">late</span>':''}</div></div>`}).join(''):'<div class="empty">Koi udhaar darj nahi.<br>Kisko diya ya kisse liya, yahan likho.</div>';
+ return h+'</div><div class="hint">Udhaar kharcha/aamdani mein nahi judta. Ye alag hisaab hai, har currency apni jagah.</div>'}
+function vYear(){
+ const y=String(UI.y),B=S.base,months=[];let T={inc:0,out:0,rem:0},cats={};
+ for(let i=1;i<=12;i++){const m=y+'-'+String(i).padStart(2,'0');const s=mSum(m);months.push(s);T.inc+=s.inc;T.out+=s.out;T.rem+=s.rem;Object.entries(s.cats).forEach(([k,v])=>cats[k]=(cats[k]||0)+v)}
+ const mx=Math.max(1,...months.map(s=>Math.max(s.inc,s.out+s.rem)));
+ let svg='<svg viewBox="0 0 360 140" width="100%" role="img" aria-label="Mahine ka graph">';
+ months.forEach((s,i)=>{const x=6+i*29.5,h1=s.inc/mx*100,h2=(s.out+s.rem)/mx*100;svg+=`<rect x="${x}" y="${112-h1}" width="11" height="${h1}" rx="2" fill="var(--in)"/><rect x="${x+12}" y="${112-h2}" width="11" height="${h2}" rx="2" fill="var(--out)"/><text x="${x+11.5}" y="126" text-anchor="middle">${MON[i][0]}</text>`});svg+='</svg>';
+ const bal=T.inc-T.out-T.rem;
+ let h=ynav()+`<div class="grid"><div class="card"><div class="lab">Aamdani</div><div class="big in">${esc(fmt(T.inc,B))}</div></div><div class="card"><div class="lab">Kharcha</div><div class="big out">${esc(fmt(T.out,B))}</div></div><div class="card"><div class="lab">Ghar bheja</div><div class="big rem">${esc(fmt(T.rem,B))}</div></div><div class="card"><div class="lab">Bacha</div><div class="big ${bal<0?'out':''}">${esc(fmt(bal,B))}</div></div></div>`;
+ h+=`<div class="card"><h3>Mahine ka graph <span class="lab">(<span class="in">■</span> aamdani <span class="out">■</span> kharcha+bheja)</span></h3>${svg}</div>`;
+ const cl=Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+ if(cl.length)h+='<div class="card"><h3>Category ke hisaab se kharcha</h3>'+cl.map(([k,v])=>{const ci=CATS_OUT.find(x=>x[0]===k)||['','❔','Anya'];return `<div style="margin:8px 0"><div class="sp" style="padding:0"><span>${ci[1]} ${ci[2]}</span><span>${esc(fmt(v,B))} · ${T.out?Math.round(v/T.out*100):0}%</span></div><div class="bar"><i style="width:${T.out?v/T.out*100:0}%"></i></div></div>`}).join('')+'</div>';
+ h+=`<div class="card"><h3>Mahine ba mahine (${esc(B)})</h3><table class="tbl"><tr><th>Mahina</th><th>Aamdani</th><th>Kharcha</th><th>Bheja</th><th>Bacha</th></tr>${months.map((s,i)=>`<tr><td>${MON[i]}</td><td>${fmtN(s.inc,B)}</td><td>${fmtN(s.out,B)}</td><td>${fmtN(s.rem,B)}</td><td class="${s.inc-s.out-s.rem<0?'out':''}">${fmtN(s.inc-s.out-s.rem,B)}</td></tr>`).join('')}</table></div>`;
+ h+=`<div class="hint" style="margin-bottom:10px">Har entry us waqt ke rate par jodi gayi hai, isliye purana hisaab rate badalne se nahi badalta.</div><button class="btn sec" data-a="csv">📄 Is saal ki CSV file (Excel ke liye)</button>`;
+ return h}
+
+/* ---------- form ---------- */
+let F=null;
+function openForm(t,e){
+ if(e){F=JSON.parse(JSON.stringify(e));F.edit=true;F.a=String(e.a);F.rate=e.c!==S.base&&e.b===S.base&&e.r?String(R3(e.r*1e3)/1e3):'';F.ra=e.ra?String(e.ra):''}
+ else{const c=S.recent[0]||'SAR';F={t:t||'out',d:today(),c,a:'',cat:'',note:'',rate:'',to:'',rc:S.base!==c?S.base:(S.recent.find(x=>x!==c)||'USD'),ra:'',person:'',k:'diya',due:''}}
+ drawForm()}
+function drawForm(){
+ const o=topOv()&&topOv().dataset.form?topOv():null;const html=formHtml();
+ if(o){o.firstChild.innerHTML=html}else{const ov=openOv(html);ov.dataset.form='1'}
+ updRate()}
+function formHtml(){
+ const T=[['out','Kharcha'],['in','Aamdani'],['rem','Ghar bheja'],['ud','Udhaar']];
+ let h=`<h2>${F.edit?'Entry badlo':'Nayi entry'}<button class="ib" data-a="x">✕</button></h2>`;
+ if(!F.edit)h+=`<div class="seg">${T.map(x=>`<button data-a="ft" data-t="${x[0]}" class="${F.t===x[0]?'on':''}">${x[1]}</button>`).join('')}</div>`;
+ h+=`<div class="amt"><input id="fa" inputmode="decimal" placeholder="0" value="${esc(F.a)}" oninput="F.a=this.value;updRate()" autocomplete="off"><button data-a="pc" data-w="c">${esc(F.c)} ▾</button></div>`;
+ h+=`<div class="chips">${S.recent.slice(0,5).map(c=>`<button class="chip ${F.c===c?'on':''}" data-a="setc" data-c="${c}">${c}</button>`).join('')}</div>`;
+ if(F.c!==S.base)h+=`<label>Rate: 1 ${esc(F.c)} = ? ${esc(S.base)} <span id="rtag"></span></label><input id="fr" inputmode="decimal" placeholder="" value="${esc(F.rate)}" oninput="F.rate=this.value;updRate()"><div class="hint" id="rprev"></div>`;
+ else h+=`<div class="hint" id="rprev"></div>`;
+ if(F.t==='out'||F.t==='in'){const L=F.t==='in'?CATS_IN:CATS_OUT;h+=`<label>Category</label><div class="chips">${L.map(x=>`<button class="chip ${F.cat===x[0]?'on':''}" data-a="cat" data-k="${x[0]}">${x[1]} ${x[2]}</button>`).join('')}</div>`}
+ if(F.t==='rem'){h+=`<label>Kisko bheja</label><input id="fto" list="dl" placeholder="Naam (optional)" value="${esc(F.to)}" oninput="F.to=this.value"><datalist id="dl">${[...new Set(S.entries.filter(e=>e.to).map(e=>e.to))].map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+ <label>Wahan kitne pahunche (optional, asli rate nikalne ke liye)</label><div class="amt"><input id="fra" inputmode="decimal" placeholder="0" value="${esc(F.ra)}" oninput="F.ra=this.value;updRate()" style="font-size:18px"><button data-a="pc" data-w="rc">${esc(F.rc)} ▾</button></div><div class="hint" id="eff"></div>`}
+ if(F.t==='ud'){h+=`<label>Kiske saath</label><input id="fp" list="dp" placeholder="Naam" value="${esc(F.person)}" oninput="F.person=this.value"><datalist id="dp">${Object.keys(udPeople()).map(n=>`<option value="${esc(n)}">`).join('')}</datalist><div class="chips">${UDK.map(k=>`<button class="chip ${F.k===k[0]?'on':''}" data-a="uk" data-k="${k[0]}">${k[1]} ${k[2]}</button>`).join('')}</div><label>Wapsi ki tareekh (optional)</label><input type="date" id="fdu" value="${esc(F.due)}" onchange="F.due=this.value">`}
+ h+=`<label>Tareekh</label><input type="date" id="fd" value="${esc(F.d)}" onchange="F.d=this.value"><label>Note (optional)</label><input id="fn" value="${esc(F.note)}" oninput="F.note=this.value" placeholder="Jaise: Western Union / bijli bill"><div style="height:12px"></div><button class="btn" data-a="fsave">Save karo</button>${F.edit?'<div style="height:8px"></div><button class="btn dan" data-a="fdel">Hata do</button>':''}`;
+ return h}
+function curRate(){if(F.c===S.base)return 1;const r=num(F.rate);return r>0?r:xrate(F.c,S.base)}
+function updRate(){if(!F)return;const a=num(F.a),r=curRate();const p=$('#rprev');
+ if(p){p.textContent=F.c===S.base?'':(r?(a?`≈ ${fmt(a*r,S.base)}`:''):'Is currency ka rate nahi mila. Upar rate khud daalo.')}
+ const tg=$('#rtag');if(tg){const am=xrate(F.c,S.base);tg.textContent=am?`(abhi ka: ${am.toFixed(4)}${rateAge()===null?', andaaza':''})`:''}
+ const fr=$('#fr');if(fr)fr.placeholder=String(+xrate(F.c,S.base).toFixed(4)||'');
+ const ef=$('#eff');if(ef){const ra=num(F.ra);ef.textContent=a&&ra?`Asli rate: 1 ${F.c} = ${(ra/a).toFixed(4)} ${F.rc}`+(xrate(F.c,F.rc)?` (market ≈ ${xrate(F.c,F.rc).toFixed(4)})`:''):''}}
+function saveForm(){
+ const a=R3(num(F.a));if(!(a>0)){toast('Rakam daalo');return}
+ if(F.t==='ud'&&!F.person.trim()){toast('Naam daalo');return}
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(F.d)){toast('Tareekh theek karo');return}
+ const r=curRate();if(!r){toast('Rate nahi mila, rate khud daalo');return}
+ const rb=rate(S.base);
+ const e={id:F.id||uid(),t:F.t,d:F.d,c:F.c,a,cat:(F.t==='out'||F.t==='in')?(F.cat||'anya'):'',note:F.note.trim(),b:S.base,r:F.c===S.base?1:r,u:rb?r/rb:0};
+ if(F.t==='rem'){e.to=(F.to||'').trim();const ra=R3(num(F.ra));if(ra>0){e.ra=ra;e.rc=F.rc}}
+ if(F.t==='ud'){e.person=F.person.trim();e.k=F.k;if(F.due&&(F.k==='diya'||F.k==='liya'))e.due=F.due}
+ if(F.edit){const i=S.entries.findIndex(x=>x.id===e.id);if(i>=0)S.entries[i]=e}else S.entries.push(e);
+ bumpRecent(F.c);if(F.t==='rem'&&e.rc)bumpRecent(e.rc);
+ save();const mo=e.d.slice(0,7);if(mo!==UI.m&&UI.tab!=='year'&&UI.tab!=='rem'&&UI.tab!=='ud')UI.m=mo;
+ closeOv();F=null;render();toast('Save ho gaya ✔')}
+
+/* ---------- currency picker ---------- */
+function pickCur(w){
+ const ov=openOv(`<h2>Currency chuno<button class="ib" data-a="x">✕</button></h2><input id="cq" placeholder="Dhundo: SAR, rupee, riyal..." autocomplete="off"><div class="cl" id="cl"></div>`);
+ const all=allCurs();const draw=q=>{q=q.trim().toLowerCase();let l=all.filter(c=>!q||c.toLowerCase().includes(q)||cname(c).toLowerCase().includes(q));const rec=S.recent.filter(c=>l.includes(c));l=[...rec,...l.filter(c=>!rec.includes(c))];ov.querySelector('#cl').innerHTML=l.map(c=>`<div class="row" data-a="pick" data-c="${c}" data-w="${w}"><div class="ico" style="font-size:12px;font-weight:700">${c}</div><div class="rt"><b>${esc(cname(c))}</b></div></div>`).join('')||'<div class="empty">Nahi mili</div>'};
+ draw('');ov.querySelector('#cq').addEventListener('input',e=>draw(e.target.value));setTimeout(()=>ov.querySelector('#cq').focus(),50)}
+
+/* ---------- person ---------- */
+function showPerson(n){
+ const P=udPeople()[n];if(!P)return;const l=sorted().filter(e=>e.t==='ud'&&e.person.trim()===n);
+ const bs=Object.entries(P.bal).filter(([c,v])=>Math.abs(v)>=.001);
+ openOv(`<h2>${esc(n)}<button class="ib" data-a="x">✕</button></h2><div class="card">${bs.length?bs.map(([c,v])=>`<div class="sp"><span>${v>0?'Aapko milna hai':'Aapko dena hai'}</span><b class="${v>0?'in':'out'}">${esc(fmt(Math.abs(v),c))}</b></div>`).join(''):'<div class="sp"><span>Hisaab saaf ✔</span></div>'}</div><button class="btn" data-a="pwap" data-n="${esc(n)}">Wapsi / naya len-den darj karo</button><div class="card">${l.map(entryRow).join('')}</div>`)}
+
+/* ---------- settings / backup ---------- */
+function openSettings(){
+ const age=rateAge();
+ openOv(`<h2>Settings<button class="ib" data-a="x">✕</button></h2>
+ <div class="card"><h3>Main currency (total isi mein dikhega)</h3><button class="btn sec" data-a="pc" data-w="base">${esc(S.base)} ▾ ${esc(cname(S.base))}</button><div class="hint">Badalne par purani entries nayi currency mein badal kar dikhengi (aaj ke rate se, jahan us waqt ka rate nahi tha).</div></div>
+ <div class="card"><h3>Mahine ka kharcha budget (${esc(S.base)})</h3><input id="sb" inputmode="decimal" value="${S.budget||''}" placeholder="0 = band"><h3 style="margin-top:12px">Mahine ka bachat target (${esc(S.base)})</h3><input id="sg" inputmode="decimal" value="${S.goal||''}" placeholder="0 = band"><div style="height:10px"></div><button class="btn sm" data-a="sbg">Save</button></div>
+ <div class="card"><h3>Currency rate</h3><div class="hint">${age===null?'Abhi andaaze wale rate hain.':'Aakhri update: '+(age<1?'abhi':age+' ghante pehle')+' ('+esc(S.fx.src)+')'}</div><div style="height:8px"></div><button class="btn sec" data-a="rr">🔄 Rate abhi update karo</button><div class="hint">Har entry mein aap apna asli rate bhi daal sakte ho (jo bank/exchange ne diya).</div></div>
+ <div class="card"><h3>Backup (zaroor lo)</h3><div class="hint">Data sirf aapke phone mein hai. Phone badla ya browser ka data mita to backup ke bina sab chala jaayega.${S.lastBackup?'<br>Aakhri backup: '+new Date(S.lastBackup).toLocaleDateString():''}</div><div style="height:8px"></div><button class="btn" data-a="bk">💾 Backup lo (file)</button><div style="height:8px"></div><button class="btn sec" data-a="bks">📤 WhatsApp / kisi ko bhejo</button><div style="height:8px"></div><button class="btn sec" data-a="imp">📥 Backup wapas lo</button><input type="file" id="impf" accept=".json,application/json" hidden></div>
+ <div class="card"><h3>Khatarnak</h3><button class="btn dan" data-a="wipe">Saara data mita do</button></div>
+ <div class="hint" style="text-align:center">Mera Hisaab · aapka data kisi server par nahi jaata.</div>`)}
+function backupObj(){return{app:'mera-hisaab',v:1,at:Date.now(),data:{base:S.base,recent:S.recent,entries:S.entries,budget:S.budget,goal:S.goal}}}
+function download(name,type,txt){const b=new Blob([txt],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(a.href)},1500)}
+function doBackup(){download('hisaab-backup-'+today()+'.json','application/json',JSON.stringify(backupObj()));S.lastBackup=Date.now();save();toast('Backup file download ho gayi')}
+async function shareBackup(){const f=new File([JSON.stringify(backupObj())],'hisaab-backup-'+today()+'.json',{type:'application/json'});try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Hisaab backup'});S.lastBackup=Date.now();save();return}}catch(e){if(e&&e.name==='AbortError')return}doBackup()}
+function cleanEntry(e){if(!e||typeof e!=='object')return null;const t=['in','out','rem','ud'].includes(e.t)?e.t:null;const a=R3(num(e.a));if(!t||!(a>0)||!/^\d{4}-\d{2}-\d{2}$/.test(e.d||'')||!/^[A-Z]{3}$/.test(e.c||''))return null;
+ const o={id:String(e.id||uid()).slice(0,40),t,d:e.d,c:e.c,a,cat:String(e.cat||'').slice(0,20),note:String(e.note||'').slice(0,200),b:/^[A-Z]{3}$/.test(e.b||'')?e.b:S.base,r:+e.r>0?+e.r:0,u:+e.u>0?+e.u:0};
+ if(t==='rem'){o.to=String(e.to||'').slice(0,60);if(+e.ra>0&&/^[A-Z]{3}$/.test(e.rc||'')){o.ra=R3(+e.ra);o.rc=e.rc}}
+ if(t==='ud'){o.person=String(e.person||'?').slice(0,60);o.k=UDK.some(k=>k[0]===e.k)?e.k:'diya';if(/^\d{4}-\d{2}-\d{2}$/.test(e.due||''))o.due=e.due}
+ return o}
+function importFile(file){const rd=new FileReader();rd.onload=()=>{let j;try{j=JSON.parse(rd.result)}catch(e){toast('File theek nahi hai');return}
+ const d=j&&j.data;if(!j||j.app!=='mera-hisaab'||!d||!Array.isArray(d.entries)){toast('Ye Hisaab ki backup file nahi hai');return}
+ const ents=d.entries.map(cleanEntry).filter(Boolean);
+ const ov=openOv(`<h2>${ents.length} entries mili<button class="ib" data-a="x">✕</button></h2><div class="hint">Merge: purani entries rahengi, nayi judengi. Badal do: abhi ka sab data hat kar file wala aayega.</div><div style="height:10px"></div><button class="btn" id="im1">Milao (merge)</button><div style="height:8px"></div><button class="btn dan" id="im2">Badal do (replace)</button>`);
+ ov.querySelector('#im1').onclick=()=>{const ids=new Set(S.entries.map(e=>e.id));ents.forEach(e=>{if(!ids.has(e.id))S.entries.push(e)});save();closeAll();render();toast('Merge ho gaya ✔')};
+ ov.querySelector('#im2').onclick=()=>{S.entries=ents;if(/^[A-Z]{3}$/.test(d.base||''))S.base=d.base;if(Array.isArray(d.recent))S.recent=d.recent.filter(c=>/^[A-Z]{3}$/.test(c)).slice(0,8);S.budget=+d.budget||0;S.goal=+d.goal||0;save();closeAll();render();toast('Data wapas aa gaya ✔')}};rd.readAsText(file)}
+function closeAll(){$('#ovs').innerHTML='';if(pendingReload)location.reload()}
+function csv(){const y=String(UI.y);const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';const rows=[['date','type','category','amount','currency','rate_to_'+S.base,'amount_in_'+S.base,'person_or_recipient','received_amount','received_currency','note']];
+ sorted().filter(e=>e.d.startsWith(y)).reverse().forEach(e=>rows.push([e.d,{in:'income',out:'expense',rem:'remittance',ud:'udhaar:'+e.k}[e.t],e.cat,e.a,e.c,e.b===S.base?e.r:'',R3(bv(e)),e.person||e.to||'',e.ra||'',e.rc||'',e.note]));
+ download('hisaab-'+y+'.csv','text/csv;charset=utf-8','\ufeff'+rows.map(r=>r.map(q).join(',')).join('\n'))}
+
+/* ---------- actions ---------- */
+const A={
+ tab(el){UI.tab=el.dataset.t;render();scrollTo(0,0)},
+ add(el){openForm(el.dataset.t||(UI.tab==='rem'?'rem':UI.tab==='ud'?'ud':'out'))},
+ edit(el){const e=S.entries.find(x=>x.id===el.dataset.id);if(e)openForm(e.t,e)},
+ mm(el){UI.m=shiftM(UI.m,+el.dataset.d);render()},
+ yy(el){UI.y+=+el.dataset.d;render()},
+ flt(el){UI.f=el.dataset.f;render()},
+ x(){closeOv()},
+ ft(el){F.t=el.dataset.t;F.cat='';drawForm()},
+ setc(el){F.c=el.dataset.c;if(F.t==='rem'&&F.rc===F.c)F.rc=F.c!==S.base?S.base:'USD';F.rate='';drawForm()},
+ cat(el){F.cat=el.dataset.k;drawForm()},
+ uk(el){F.k=el.dataset.k;drawForm()},
+ pc(el){pickCur(el.dataset.w)},
+ pick(el){const c=el.dataset.c,w=el.dataset.w;closeOv();if(w==='base'){S.base=c;bumpRecent(c);save();closeOv();render();openSettings();return}if(w==='rc')F.rc=c;else{F.c=c;F.rate='';if(F.t==='rem'&&F.rc===c)F.rc=c!==S.base?S.base:'USD'}drawForm()},
+ fsave(){saveForm()},
+ fdel(){if(confirm('Ye entry hata dein?')){S.entries=S.entries.filter(e=>e.id!==F.id);save();closeOv();F=null;render();toast('Hata di')}},
+ person(el){showPerson(el.dataset.n)},
+ pwap(el){closeOv();openForm('ud');F.person=el.dataset.n;F.k='wapas_mila';drawForm()},
+ setg(){openSettings()},
+ sbg(){S.budget=Math.max(0,num($('#sb').value));S.goal=Math.max(0,num($('#sg').value));save();closeOv();render();toast('Save ✔')},
+ rr(el){if(el&&el.tagName==='A')event.preventDefault();toast('Rate la raha hoon…');refreshRates(true)},
+ bk(){doBackup()},bks(){shareBackup()},
+ imp(){const f=$('#impf');f.onchange=()=>{if(f.files[0])importFile(f.files[0])};f.click()},
+ wipe(){if(confirm('Saara hisaab mit jaayega. Pehle backup liya hai?')&&confirm('Pakka mita dein?')){S=fresh();save();closeAll();render()}},
+ csv(){csv()}
+};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;const f=A[el.dataset.a];if(f){if(el.tagName==='A')e.preventDefault();f(el)}});
+
+/* ---------- boot ---------- */
+render();
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+if(!S.fx.t||Date.now()-S.fx.t>12*36e5)refreshRates(false);
+if('serviceWorker' in navigator){const had=!!navigator.serviceWorker.controller;
+ navigator.serviceWorker.register('chat-sw.js').then(reg=>{document.addEventListener('visibilitychange',()=>{if(!document.hidden){reg.update().catch(()=>{});if(!S.fx.t||Date.now()-S.fx.t>12*36e5)refreshRates(false)}})}).catch(()=>{});
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!had||window.__rl)return;window.__rl=1;if($('#ovs').children.length)pendingReload=true;else location.reload()})}
+window.__t={S:()=>S,UI,render,fmt,bv,refreshRates};
+</script>
+</body>
+</html>
