@@ -1,4 +1,4 @@
-const C='qari-v1',F=['./','index.html','manifest.json','qari-192.png','qari-512.png','app.enc','users.json'];
+const C='qari-v3',F=['./','index.html','manifest.json','qari-192.png','qari-512.png','qari-maskable-512.png','apple-touch-icon.png','app.enc','users.json'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(F)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
 self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;
